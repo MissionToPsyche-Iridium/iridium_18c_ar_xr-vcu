@@ -199,10 +199,10 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd ../../textures/dull-metal-bl/dull-metal-bl/dull_metal_albedo.png
-map_Pm ../../textures/dull-metal-bl/dull-metal-bl/dull_metal_metallic.png
-map_Pr ../../textures/dull-metal-bl/dull-metal-bl/dull_metal_roughness.png
-map_Bump -bm 1.000000 ../../textures/dull-metal-bl/dull-metal-bl/dull_metal_normal-ogl.png
+map_Kd ../../textures/dull-metal-bl/dull_metal_albedo.png
+map_Pm ../../textures/dull-metal-bl/dull_metal_metallic.png
+map_Pr ../../textures/dull-metal-bl/dull_metal_roughness.png
+map_Bump -bm 1.000000 ../../textures/dull-metal-bl/dull_metal_normal-ogl.png
 
 newmtl black?
 Kd 0.000000 0.000000 0.000000
@@ -230,10 +230,10 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd ../../textures/light-gold-bl/light-gold-bl/lightgold_albedo.png
-map_Pm ../../textures/light-gold-bl/light-gold-bl/lightgold_metallic.png
-map_Pr ../../textures/light-gold-bl/light-gold-bl/lightgold_roughness.png
-map_Bump -bm 1.000000 ../../textures/light-gold-bl/light-gold-bl/lightgold_normal-ogl.png
+map_Kd ../../textures/light-gold-bl/lightgold_albedo.png
+map_Pm ../../textures/light-gold-bl/lightgold_metallic.png
+map_Pr ../../textures/light-gold-bl/lightgold_roughness.png
+map_Bump -bm 1.000000 ../../textures/light-gold-bl/lightgold_normal-ogl.png
 
 newmtl gold_gold
 Ks 0.500000 0.500000 0.500000
@@ -246,7 +246,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd ../../textures/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_basecolor.png
-map_Pm ../../textures/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_metallic.png
-map_Pr ../../textures/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_roughness.png
-map_Bump -bm 1.000000 ../../textures/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_normal.png
+map_Kd ../../textures/gold-scuffed-bl/gold-scuffed_basecolor.png
+map_Pm ../../textures/gold-scuffed-bl/gold-scuffed_metallic.png
+map_Pr ../../textures/gold-scuffed-bl/gold-scuffed_roughness.png
+map_Bump -bm 1.000000 ../../textures/gold-scuffed-bl/gold-scuffed_normal.png

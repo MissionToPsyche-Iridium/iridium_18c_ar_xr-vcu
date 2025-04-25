@@ -1,0 +1,68 @@
+# Blender 4.0.2 MTL File: 'None'
+# www.blender.org
+
+newmtl Dark_Grey.002
+Ns 250.000000
+Ka 0.700000 0.700000 0.700000
+Kd 0.035065 0.049438 0.046021
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+newmtl black?
+Ns 90.000000
+Ka 0.300000 0.300000 0.300000
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+newmtl gold
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd /Users/ankita/capstone/PSYCHE_SpaceHunt-1/assets/textures/light-gold-bl/lightgold_albedo.png
+map_Ns /Users/ankita/capstone/PSYCHE_SpaceHunt-1/assets/textures/light-gold-bl/lightgold_roughness.png
+map_refl /Users/ankita/capstone/PSYCHE_SpaceHunt-1/assets/textures/light-gold-bl/lightgold_metallic.png
+map_Bump -bm 1.000000 /Users/ankita/capstone/PSYCHE_SpaceHunt-1/assets/textures/light-gold-bl/lightgold_normal-ogl.png
+
+newmtl gold_gold.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_basecolor.png
+map_Ns C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_roughness.png
+map_refl C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_metallic.png
+map_Bump -bm 1.000000 C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_normal.png
+
+newmtl silver.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/10and/Downloads/silver-bl/silver-bl/silver_albedo.png
+map_Ns C:/Users/10and/Downloads/silver-bl/silver-bl/silver_roughness.png
+map_refl C:/Users/10and/Downloads/silver-bl/silver-bl/silver_metallic.png
+map_Bump -bm 1.000000 C:/Users/10and/Downloads/silver-bl/silver-bl/silver_normal-ogl.png
+
+newmtl white_base
+Ns 250.000000
+Ka 0.200000 0.200000 0.200000
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3

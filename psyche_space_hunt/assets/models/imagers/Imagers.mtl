@@ -27,7 +27,7 @@ Pc 0.000000
 Pcr 0.030000
 aniso 0.000000
 anisor 0.000000
-map_Kd ../../textures/silver-bl/silver-bl/silver_albedo.png
-map_Pm ../../textures/silver-bl/silver-bl/silver_metallic.png
-map_Pr ../../textures/silver-bl/silver-bl/silver_roughness.png
-map_Bump -bm 1.000000 ../../textures/silver-bl/silver-bl/silver_normal-ogl.png
+map_Kd ../../textures/silver-bl/silver_albedo.png
+map_Pm ../../textures/silver-bl/silver_metallic.png
+map_Pr ../../textures/silver-bl/silver_roughness.png
+map_Bump -bm 1.000000 ../../textures/silver-bl/silver_normal-ogl.png
