@@ -218,6 +218,7 @@
             opacity: 0;
             transition: opacity 0.5s;
             pointer-events: none;
+            -webkit-overflow-scrolling: touch; /* Improve iPhone scrolling */
         }
         
         #credits-overlay.active {
@@ -227,16 +228,17 @@
         
         .credits-container {
             background-color: rgba(10, 20, 50, 0.9);
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             max-width: 700px;
             width: 85%;
-            max-height: 90vh;
+            max-height: 80vh;
             overflow-y: auto;
             text-align: center;
             border: 2px solid #4a90e2;
             box-shadow: 0 0 30px rgba(74, 144, 226, 0.5), 0 0 60px rgba(0, 0, 0, 0.5);
             position: relative;
+            -webkit-overflow-scrolling: touch; /* Improve iPhone scrolling */
         }
         
         .credits-container::-webkit-scrollbar {
@@ -345,21 +347,21 @@
         
         .close-credits {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
+            top: 10px;
+            right: 10px;
+            background: rgba(60, 100, 180, 0.3);
             color: white;
+            border: none;
+            width: 44px; /* Apple recommends at least 44×44 touch targets */
+            height: 44px;
+            border-radius: 50%;
             font-size: 24px;
-            cursor: pointer;
-            width: 30px;
-            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0;
-            border-radius: 50%;
-            transition: all 0.3s ease;
+            touch-action: manipulation; /* Improved touch handling */
+            cursor: pointer;
+            z-index: 2000;
         }
         
         .close-credits:hover {
@@ -398,6 +400,7 @@
             opacity: 0;
             transition: opacity 0.5s;
             pointer-events: none;
+            -webkit-overflow-scrolling: touch; /* Improve iPhone scrolling */
         }
         
         #study-guide-overlay.active {
@@ -407,14 +410,17 @@
         
         .study-guide-container {
             background-color: rgba(10, 20, 50, 0.9);
-            padding: 30px;
+            padding: 25px;
+            padding-bottom: 80px; /* Add space for the button at bottom */
             border-radius: 15px;
             max-width: 500px;
             width: 85%;
-            max-height: 80vh;
+            max-height: 75vh; /* Slightly smaller to ensure button visibility */
             overflow-y: auto;
             border: 2px solid #4a90e2;
             box-shadow: 0 0 30px rgba(74, 144, 226, 0.5), 0 0 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            -webkit-overflow-scrolling: touch; /* Improve iPhone scrolling */
         }
         
         .guide-title {
@@ -453,16 +459,23 @@
         }
         
         #close-guide-btn {
-            background-color: rgba(40, 70, 120, 0.8);
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(40, 70, 120, 0.95);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 18px;
+            width: 80%;
+            max-width: 300px; 
+            font-weight: bold;
             cursor: pointer;
-            font-size: 16px;
-            margin-top: 20px;
-            width: 100%;
-            transition: background-color 0.3s;
+            z-index: 2001;
+            touch-action: manipulation;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
         
         #close-guide-btn:hover {
@@ -584,6 +597,49 @@
             cursor: pointer;
             font-size: 14px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Mobile-friendly close buttons */
+        .close-guide-mobile {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(60, 100, 180, 0.3);
+            color: white;
+            border: none;
+            width: 44px; /* Apple recommends at least 44×44 touch targets */
+            height: 44px;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation; /* Improved touch handling */
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        /* Media query for iPhone and other mobile devices */
+        @media only screen and (max-width: 767px) {
+            .study-guide-container, .credits-container, .score-tracker-container {
+                max-height: 70vh; /* Smaller container on mobile */
+                padding-top: 50px; /* Space for the X button */
+                padding-bottom: 90px; /* Space for button at bottom */
+                margin-bottom: 20px;
+            }
+            
+            .guide-content {
+                padding-bottom: 20px;
+            }
+            
+            .guide-content ul {
+                padding-left: 20px;
+            }
+            
+            .close-credits, .close-guide-mobile {
+                top: 15px;
+                right: 15px;
+            }
         }
     </style>
 </head>
@@ -726,11 +782,15 @@
             <div class="credits-disclaimer">
                 <p>This work was created in partial fulfillment of Virginia Commonwealth University Capstone Course "CMSC442/CMSC452″. The work is a result of the Psyche Student Collaborations component of NASA's Psyche Mission (https://psyche.asu.edu/). "Psyche: A Journey to a Metal World" [Contract number NNM16AA09C] is part of the NASA Discovery Program mission to solar system targets. Trade names and trademarks of ASU and NASA are used in this work for identification only. Their usage does not constitute an official endorsement, either expressed or implied, by Arizona State University or National Aeronautics and Space Administration. The content is solely the responsibility of the authors and does not necessarily represent the official views of ASU or NASA.</p>
             </div>
+            
+            <!-- New bottom close button for better mobile UX -->
+            <button id="close-credits-btn">CLOSE</button>
         </div>
     </div>
 
     <div id="study-guide-overlay" class="hidden">
         <div class="study-guide-container">
+            <button class="close-guide-mobile">&times;</button>
             <h2 class="guide-title">Psyche Mission Study Guide</h2>
             <div class="guide-content">
                 <ul>
@@ -746,7 +806,8 @@
                     <li>Experimental laser-based communication protocol testing during cruise phase</li>
                 </ul>
             </div>
-            <button id="close-guide-btn">Close Guide</button>
+            <!-- Keep the original button but with new fixed positioning -->
+            <button id="close-guide-btn">CLOSE GUIDE</button>
         </div>
     </div>
 
@@ -1163,7 +1224,35 @@
                 document.getElementById('study-guide-overlay').classList.remove('active');
                 setTimeout(() => document.getElementById('study-guide-overlay').classList.add('hidden'), 500);
             });
+
+            // Add handler for the mobile X button
+            document.querySelector('.close-guide-mobile').addEventListener('click', function() {
+                document.getElementById('study-guide-overlay').classList.remove('active');
+                setTimeout(() => document.getElementById('study-guide-overlay').classList.add('hidden'), 500);
+            });
             
+            // Add handler for the new credits bottom button
+            document.getElementById('close-credits-btn').addEventListener('click', function() {
+                document.getElementById('credits-overlay').classList.remove('active');
+                setTimeout(() => {
+                    // If there's a hidden class to add
+                    if (document.getElementById('credits-overlay').classList.contains('hidden')) {
+                        document.getElementById('credits-overlay').classList.add('hidden');
+                    }
+                }, 500);
+            });
+            
+            // Make sure the original X button for credits also works
+            document.querySelector('.close-credits').addEventListener('click', function() {
+                document.getElementById('credits-overlay').classList.remove('active');
+                setTimeout(() => {
+                    // If there's a hidden class to add
+                    if (document.getElementById('credits-overlay').classList.contains('hidden')) {
+                        document.getElementById('credits-overlay').classList.add('hidden');
+                    }
+                }, 500);
+            });
+
             // Initialize score display
             updateScoreDisplay();
         });
