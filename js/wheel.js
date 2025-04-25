@@ -16,6 +16,10 @@ AFRAME.registerComponent('wheel-spinner', {
         this.customAudio = null;
         this.loopTimeout = null;
         
+        // Track segment history to ensure variety
+        this.segmentHistory = [];
+        this.maxHistoryLength = 8;
+        
         // Ensure initial rotation is 0
         this.el.setAttribute('rotation', '0 0 0');
         
@@ -121,6 +125,34 @@ AFRAME.registerComponent('wheel-spinner', {
         }
     },
 
+    // Logic to avoid repeating the same segment too often
+    getValidSegment: function() {
+        // Count occurrences of each segment in the history
+        const segmentCounts = new Array(this.segments).fill(0);
+        this.segmentHistory.forEach(segment => {
+            segmentCounts[segment]++;
+        });
+        
+        // Find segments that have appeared fewer than 2 times
+        const validSegments = [];
+        for (let i = 0; i < this.segments; i++) {
+            if (segmentCounts[i] < 2) {
+                validSegments.push(i);
+            }
+        }
+        
+        // If no valid segments (unlikely), allow any segment
+        if (validSegments.length === 0) {
+            for (let i = 0; i < this.segments; i++) {
+                validSegments.push(i);
+            }
+        }
+        
+        // Randomly select from valid segments
+        const randomIndex = Math.floor(Math.random() * validSegments.length);
+        return validSegments[randomIndex];
+    },
+
     spin: function() {
         // Reset audio state
         this.isAudioFading = false;
@@ -153,28 +185,36 @@ AFRAME.registerComponent('wheel-spinner', {
         this.spinStartTime = performance.now();
         this.startRotation = this.rotation;
         
-        // Ensure we spin at least 2 full rotations plus a random amount
-        this.spinAmount = 720 + Math.random() * 360;
+        // Get a valid segment using our anti-repetition logic
+        const targetSegment = this.getValidSegment();
         
-        // Calculate which segment will be selected when wheel stops
-        const totalRotation = (this.startRotation + this.spinAmount) % 360;
-        
-        // Arrow points to the right (90 degrees), adjust the segment calculation
+        // Calculate rotation needed to land on the selected segment
         // Each segment is 45 degrees (360/8)
-        // We need to get the final rotation value to determine where the wheel will stop
-        const finalRotation = (this.startRotation + this.spinAmount) % 360;
+        // We need to add a random offset within the segment for natural feel
+        const segmentAngle = 45;
+        const segmentStartAngle = targetSegment * segmentAngle;
+        const randomOffset = Math.random() * (segmentAngle * 0.7) + (segmentAngle * 0.15); // Random position within middle 70% of segment
+        const targetAngle = segmentStartAngle + randomOffset;
         
-        // The arrow is fixed at 90 degrees (right side)
-        // We need to find which segment will be under the arrow when the wheel stops
-        const segmentAngle = (finalRotation + 90) % 360;
-        this.selectedSegment = Math.floor(segmentAngle / 45) % 8;
+        // To make arrow at 0 degrees point to the segment, we need to rotate the wheel so the targetAngle is at 0
+        // We also add multiple full rotations for a satisfying spin
+        const fullRotations = 2 + Math.floor(Math.random() * 2); // 2-3 full rotations
+        this.spinAmount = (360 * fullRotations) + (360 - targetAngle);
         
-        console.log("Spin started, duration:", this.data.spinDuration, "ms");
+        // The segment that will be selected
+        this.selectedSegment = targetSegment;
+        
+        // Add to history
+        this.segmentHistory.push(this.selectedSegment);
+        if (this.segmentHistory.length > this.maxHistoryLength) {
+            this.segmentHistory.shift(); // Remove oldest entry if we exceed max history
+        }
+        
+        console.log("Spin started, targeting segment:", this.selectedSegment);
         console.log("Start rotation:", this.startRotation);
         console.log("Spin amount:", this.spinAmount);
-        console.log("Final rotation:", finalRotation);
-        console.log("Segment angle:", segmentAngle);
-        console.log("Selected segment will be:", this.selectedSegment);
+        console.log("Final angle:", targetAngle);
+        console.log("Segment history:", this.segmentHistory);
         
         // Dispatch custom event that the wheel is spinning
         document.dispatchEvent(new CustomEvent('wheel-spinning', {

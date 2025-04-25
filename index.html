@@ -641,6 +641,162 @@
                 right: 15px;
             }
         }
+
+        /* Completion Screen Styles */
+        #completion-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #completion-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .completion-container {
+            background-color: #1a1a2e;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(100, 162, 255, 0.5);
+            padding: 30px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            color: white;
+            border: 2px solid #64a2ff;
+            position: relative;
+        }
+
+        .completion-title {
+            color: #ffb800;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 184, 0, 0.5);
+        }
+
+        .completion-message {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .category-completion {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .category-item {
+            width: 45%;
+            margin: 10px 0;
+            padding: 15px;
+            background-color: rgba(40, 50, 80, 0.6);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(100, 162, 255, 0.3);
+        }
+
+        .category-title {
+            color: #64a2ff;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .completion-progress {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4a6cd0, #64a2ff);
+            border-radius: 5px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .completion-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #ffb800;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #64a2ff;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #4a6cd0, #64a2ff);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(100, 162, 255, 0.5);
+        }
+
+        .restart-btn:hover {
+            background: linear-gradient(135deg, #5a7ce0, #74b2ff);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(100, 162, 255, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .category-item {
+                width: 90%;
+            }
+            
+            .completion-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+
+        /* Mobile Score Button Styles */
+        .score-btn {
+            background-color: rgba(231, 76, 60, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .score-btn:hover {
+            background-color: rgba(231, 76, 60, 1);
+        }
     </style>
 </head>
 <body>
@@ -819,8 +975,37 @@
                 <p id="mobile-correct-counter" class="correct-score">Correct: 0</p>
                 <p id="mobile-incorrect-counter" class="incorrect-score">Incorrect: 0</p>
                 <p id="mobile-accuracy-counter" class="accuracy">Accuracy: 0%</p>
+                <!-- Reset button removed from mobile overlay -->
+                <button id="close-tracker-btn">Close Tracker</button>
             </div>
-            <button id="close-tracker-btn">Close Tracker</button>
+        </div>
+    </div>
+
+    <div id="completion-overlay" class="hidden">
+        <div class="completion-container">
+            <h2 class="completion-title">Trivia Master!</h2>
+            <p class="completion-message">Congratulations! You've completed all the questions about the Psyche mission. Your exploration of this incredible NASA mission has been stellar!</p>
+            
+            <div class="completion-stats">
+                <div class="stat-item">
+                    <div id="completion-total" class="stat-value">0/16</div>
+                    <div class="stat-label">Questions Completed</div>
+                </div>
+                <div class="stat-item">
+                    <div id="completion-correct" class="stat-value">0</div>
+                    <div class="stat-label">Correct Answers</div>
+                </div>
+                <div class="stat-item">
+                    <div id="completion-accuracy" class="stat-value">0%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+            </div>
+            
+            <div class="category-completion">
+                <!-- Categories will be filled dynamically -->
+            </div>
+            
+            <button id="restart-btn" class="restart-btn">Play Again</button>
         </div>
     </div>
 
@@ -929,6 +1114,7 @@
                 id="accuracy-counter"
                 text="value: Accuracy: 0%; color: white; align: center; width: 1.8; wrapCount: 20"
                 position="0 -0.35 0.01"></a-entity>
+            <!-- Reset button removed from 3D score tracker -->
         </a-entity>
     </a-scene>
 
@@ -1024,21 +1210,28 @@
             let incorrectAnswers = 0;
             let answersSelected = false;
             
+            // Make score variables globally accessible
+            window.correctAnswers = correctAnswers;
+            window.incorrectAnswers = incorrectAnswers;
+            
             // Update score display function
             function updateScoreDisplay() {
-                const totalAnswers = correctAnswers + incorrectAnswers;
-                const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+                const totalAnswers = window.correctAnswers + window.incorrectAnswers;
+                const accuracy = totalAnswers > 0 ? Math.round((window.correctAnswers / totalAnswers) * 100) : 0;
                 
                 // Update 3D panel
-                document.getElementById('correct-counter').setAttribute('text', 'value: Correct: ' + correctAnswers);
-                document.getElementById('incorrect-counter').setAttribute('text', 'value: Incorrect: ' + incorrectAnswers);
+                document.getElementById('correct-counter').setAttribute('text', 'value: Correct: ' + window.correctAnswers);
+                document.getElementById('incorrect-counter').setAttribute('text', 'value: Incorrect: ' + window.incorrectAnswers);
                 document.getElementById('accuracy-counter').setAttribute('text', 'value: Accuracy: ' + accuracy + '%');
                 
                 // Update mobile overlay
-                document.getElementById('mobile-correct-counter').textContent = 'Correct: ' + correctAnswers;
-                document.getElementById('mobile-incorrect-counter').textContent = 'Incorrect: ' + incorrectAnswers;
+                document.getElementById('mobile-correct-counter').textContent = 'Correct: ' + window.correctAnswers;
+                document.getElementById('mobile-incorrect-counter').textContent = 'Incorrect: ' + window.incorrectAnswers;
                 document.getElementById('mobile-accuracy-counter').textContent = 'Accuracy: ' + accuracy + '%';
             }
+            
+            // Make updateScoreDisplay globally accessible
+            window.updateScoreDisplay = updateScoreDisplay;
 
             // Global wheel-stopped event handler - placed outside the start button click handler
             document.addEventListener('wheel-stopped', function(event) {
@@ -1073,8 +1266,62 @@
                 // Get a random question from the category
                 if (triviaData.questions && triviaData.questions[segmentIndex] && triviaData.questions[segmentIndex].length > 0) {
                     const categoryQuestions = triviaData.questions[segmentIndex];
-                    const randomIndex = Math.floor(Math.random() * categoryQuestions.length);
+                    
+                    // Find a question that hasn't been answered yet, if possible
+                    let unaskedQuestions = [];
+                    categoryQuestions.forEach((q, idx) => {
+                        if (!answeredQuestions[segmentIndex].includes(idx)) {
+                            unaskedQuestions.push(idx);
+                        }
+                    });
+                    
+                    // If all questions in this category have been asked, reset tracking for this category
+                    let randomIndex;
+                    if (unaskedQuestions.length > 0) {
+                        // Select a random unanswered question
+                        const randomUnaskedIndex = Math.floor(Math.random() * unaskedQuestions.length);
+                        randomIndex = unaskedQuestions[randomUnaskedIndex];
+                    } else {
+                        // Reset the category so all questions become available again
+                        console.log("All questions in category have been shown, resetting category:", categoryName);
+                        answeredQuestions[segmentIndex] = [];
+                        
+                        // Now all questions are available again
+                        unaskedQuestions = [];
+                        for (let i = 0; i < categoryQuestions.length; i++) {
+                            unaskedQuestions.push(i);
+                        }
+                        
+                        // Select a random question from the newly reset category
+                        const randomUnaskedIndex = Math.floor(Math.random() * unaskedQuestions.length);
+                        randomIndex = unaskedQuestions[randomUnaskedIndex];
+                        
+                        // Show a notification that we've cycled through all questions
+                        const cycleNotification = document.createElement('div');
+                        cycleNotification.style.position = 'fixed';
+                        cycleNotification.style.top = '20%';
+                        cycleNotification.style.left = '50%';
+                        cycleNotification.style.transform = 'translate(-50%, -50%)';
+                        cycleNotification.style.padding = '15px 30px';
+                        cycleNotification.style.background = 'rgba(74, 144, 226, 0.9)';
+                        cycleNotification.style.color = 'white';
+                        cycleNotification.style.borderRadius = '10px';
+                        cycleNotification.style.zIndex = '2000';
+                        cycleNotification.style.fontWeight = 'bold';
+                        cycleNotification.textContent = `Completed all ${categoryName} questions! Starting new round.`;
+                        document.body.appendChild(cycleNotification);
+                        
+                        setTimeout(() => {
+                            cycleNotification.style.opacity = '0';
+                            cycleNotification.style.transition = 'opacity 0.5s';
+                            setTimeout(() => document.body.removeChild(cycleNotification), 500);
+                        }, 2000);
+                    }
+                    
                     const question = categoryQuestions[randomIndex];
+                    
+                    // Track that this question will be shown
+                    trackAnsweredQuestion(segmentIndex, randomIndex);
                     
                     console.log("Selected question:", question);
                     
@@ -1113,11 +1360,11 @@
                             
                             // Update score
                             if (isCorrect) {
-                                correctAnswers++;
+                                window.correctAnswers++;
                             } else {
-                                incorrectAnswers++;
+                                window.incorrectAnswers++;
                             }
-                            updateScoreDisplay();
+                            window.updateScoreDisplay();
                             
                             // Show result
                             const resultDiv = document.getElementById('result');
@@ -1256,6 +1503,40 @@
 
             // Initialize score display
             updateScoreDisplay();
+            
+            // The reset button event listeners were removed as the buttons
+            // were relocated to a permanent position next to the study guide.
+            // These event listeners are now in the separate script below.
+            
+            // Function to reset score
+            function resetScore() {
+                window.correctAnswers = 0;
+                window.incorrectAnswers = 0;
+                window.updateScoreDisplay();
+                
+                // Optional: Add a visual confirmation
+                const flash = document.createElement('div');
+                flash.style.position = 'fixed';
+                flash.style.top = '50%';
+                flash.style.left = '50%';
+                flash.style.transform = 'translate(-50%, -50%)';
+                flash.style.padding = '15px 30px';
+                flash.style.background = 'rgba(0, 0, 0, 0.7)';
+                flash.style.color = 'white';
+                flash.style.borderRadius = '10px';
+                flash.style.zIndex = '2000';
+                flash.textContent = 'Score Reset!';
+                document.body.appendChild(flash);
+                
+                setTimeout(() => {
+                    flash.style.opacity = '0';
+                    flash.style.transition = 'opacity 0.5s';
+                    setTimeout(() => document.body.removeChild(flash), 500);
+                }, 1000);
+            }
+            
+            // Make resetScore globally accessible
+            window.resetScore = resetScore;
         });
       
       window.addEventListener('load', function() {
@@ -1441,11 +1722,392 @@
               }
           }, 3000);
       });
+
+        // Initialize question tracking
+        let answeredQuestions = {};
+        
+        // Initialize question tracking for each category
+        function initQuestionTracking() {
+            triviaData.categories.forEach((category, index) => {
+                answeredQuestions[index] = [];
+            });
+        }
+        
+        // Initialize tracking when page loads
+        initQuestionTracking();
+        
+        // Check if all questions have been answered
+        function checkAllQuestionsAnswered() {
+            let totalQuestions = 0;
+            let answeredCount = 0;
+            
+            triviaData.categories.forEach((category, index) => {
+                if (triviaData.questions[index]) {
+                    totalQuestions += triviaData.questions[index].length;
+                    answeredCount += answeredQuestions[index].length;
+                }
+            });
+            
+            // Debug
+            console.log(`Answered ${answeredCount}/${totalQuestions} questions`);
+            
+            if (answeredCount >= totalQuestions) {
+                showCompletionScreen();
+            }
+        }
+        
+        // Track answered questions
+        function trackAnsweredQuestion(categoryIndex, questionIndex) {
+            if (!answeredQuestions[categoryIndex].includes(questionIndex)) {
+                answeredQuestions[categoryIndex].push(questionIndex);
+                
+                // Check if all questions have been answered
+                checkAllQuestionsAnswered();
+            }
+        }
+        
+        // Show completion screen
+        function showCompletionScreen() {
+            // Calculate stats
+            let totalQuestions = 0;
+            let answeredCount = 0;
+            
+            triviaData.categories.forEach((category, index) => {
+                if (triviaData.questions[index]) {
+                    totalQuestions += triviaData.questions[index].length;
+                    answeredCount += answeredQuestions[index].length;
+                }
+            });
+            
+            // Update stats
+            document.getElementById('completion-total').textContent = `${answeredCount}/${totalQuestions}`;
+            document.getElementById('completion-correct').textContent = correctAnswers;
+            const accuracy = totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+            document.getElementById('completion-accuracy').textContent = `${accuracy}%`;
+            
+            // Generate category completion info
+            const categoryContainer = document.querySelector('.category-completion');
+            categoryContainer.innerHTML = '';
+            
+            triviaData.categories.forEach((category, index) => {
+                if (triviaData.questions[index]) {
+                    const categoryTotal = triviaData.questions[index].length;
+                    const categoryAnswered = answeredQuestions[index].length;
+                    const percentage = Math.round((categoryAnswered / categoryTotal) * 100);
+                    
+                    const categoryElement = document.createElement('div');
+                    categoryElement.className = 'category-item';
+                    categoryElement.innerHTML = `
+                        <div class="category-title">${category}</div>
+                        <div>${categoryAnswered}/${categoryTotal} Questions</div>
+                        <div class="completion-progress">
+                            <div class="progress-bar" style="width: ${percentage}%"></div>
+                        </div>
+                    `;
+                    
+                    categoryContainer.appendChild(categoryElement);
+                }
+            });
+            
+            // Show overlay
+            const completionOverlay = document.getElementById('completion-overlay');
+            completionOverlay.classList.remove('hidden');
+            setTimeout(() => completionOverlay.classList.add('active'), 50);
+        }
+        
+        // Add restart button handler
+        document.getElementById('restart-btn').addEventListener('click', function() {
+            // Reset tracking
+            initQuestionTracking();
+            
+            // Reset score
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            updateScoreDisplay();
+            
+            // Hide completion overlay
+            const completionOverlay = document.getElementById('completion-overlay');
+            completionOverlay.classList.remove('active');
+            setTimeout(() => completionOverlay.classList.add('hidden'), 500);
+        });
     </script>
 
     <div class="mobile-controls">
         <button id="show-guide-btn" class="mobile-btn">Study Guide</button>
+        <button id="reset-score-btn" class="mobile-btn" style="background-color: rgba(231, 76, 60, 0.8);">Reset Score</button>
     </div>
+
+    <script>
+        // Override wheel-spinner component to fix inconsistent spinning
+        window.addEventListener('DOMContentLoaded', function() {
+            // Add event listener for reset score button
+            const resetScoreBtn = document.getElementById('reset-score-btn');
+            if (resetScoreBtn) {
+                resetScoreBtn.addEventListener('click', function() {
+                    // Access the resetScore function from the main script
+                    if (typeof window.resetScore === 'function') {
+                        window.resetScore();
+                    } else {
+                        // Fallback if resetScore function isn't accessible
+                        // Reset correctAnswers and incorrectAnswers if they exist in window scope
+                        if ('correctAnswers' in window && 'incorrectAnswers' in window) {
+                            window.correctAnswers = 0;
+                            window.incorrectAnswers = 0;
+                            
+                            // Update displays
+                            document.getElementById('correct-counter').setAttribute('text', 'value: Correct: 0');
+                            document.getElementById('incorrect-counter').setAttribute('text', 'value: Incorrect: 0');
+                            document.getElementById('accuracy-counter').setAttribute('text', 'value: Accuracy: 0%');
+                            
+                            // Update mobile overlay if it exists
+                            const mobileCorrect = document.getElementById('mobile-correct-counter');
+                            const mobileIncorrect = document.getElementById('mobile-incorrect-counter');
+                            const mobileAccuracy = document.getElementById('mobile-accuracy-counter');
+                            
+                            if (mobileCorrect) mobileCorrect.textContent = 'Correct: 0';
+                            if (mobileIncorrect) mobileIncorrect.textContent = 'Incorrect: 0';
+                            if (mobileAccuracy) mobileAccuracy.textContent = 'Accuracy: 0%';
+                            
+                            // Show confirmation
+                            const flash = document.createElement('div');
+                            flash.style.position = 'fixed';
+                            flash.style.top = '50%';
+                            flash.style.left = '50%';
+                            flash.style.transform = 'translate(-50%, -50%)';
+                            flash.style.padding = '15px 30px';
+                            flash.style.background = 'rgba(0, 0, 0, 0.7)';
+                            flash.style.color = 'white';
+                            flash.style.borderRadius = '10px';
+                            flash.style.zIndex = '2000';
+                            flash.textContent = 'Score Reset!';
+                            document.body.appendChild(flash);
+                            
+                            setTimeout(() => {
+                                flash.style.opacity = '0';
+                                flash.style.transition = 'opacity 0.5s';
+                                setTimeout(() => document.body.removeChild(flash), 500);
+                            }, 1000);
+                        }
+                    }
+                });
+                console.log("Reset score button event listener added");
+            }
+            
+            // Wait for A-Frame to initialize
+            setTimeout(function() {
+                // Get the original wheel-spinner component
+                const originalComponent = AFRAME.components['wheel-spinner'];
+                if (!originalComponent) return;
+                
+                // Override the component with consistent behavior
+                AFRAME.registerComponent('wheel-spinner', {
+                    schema: originalComponent.schema,
+                    
+                    init: function() {
+                        console.log("Using improved wheel spinner with consistent timing");
+                        
+                        this.rotation = 0;
+                        this.targetRotation = 0;
+                        this.spinStartTime = 0;
+                        this.segments = 8; // 8 segments on the wheel
+                        this.selectedSegment = 0;
+                        this.spinSound = null;
+                        this.spinDuration = 4000; // Changed to 4 seconds duration
+                        
+                        // Track segment history to ensure variety
+                        this.segmentHistory = [];
+                        this.maxHistoryLength = 8;
+                        
+                        // Ensure initial rotation is 0
+                        this.el.setAttribute('rotation', '0 0 0');
+                        
+                        // Bind methods
+                        this.onClick = this.onClick.bind(this);
+                        this.onSpinComplete = this.onSpinComplete.bind(this);
+                        
+                        // Add event listener
+                        this.el.addEventListener('click', this.onClick);
+                        
+                        // Cache the sound element
+                        this.spinSound = document.querySelector('#spin-sound');
+                        
+                        console.log("Consistent wheel spinner initialized with fixed duration:", this.spinDuration, "ms");
+                    },
+                    
+                    tick: function(time, deltaTime) {
+                        // Handle spinning animation
+                        if (this.data.spinning) {
+                            const elapsed = time - this.spinStartTime;
+                            const progress = Math.min(elapsed / this.spinDuration, 1.0);
+                            
+                            // Custom easing function for more gradual deceleration
+                            // Starts fast and gradually slows down with a smoother curve
+                            const easeOut = function(t) {
+                                // Modified ease-out function with slower deceleration
+                                // First half spins at more consistent speed, then gradually slows down
+                                if (t < 0.5) {
+                                    // More linear in the first half
+                                    return 0.5 * t;
+                                } else {
+                                    // More curved deceleration in second half
+                                    return 0.5 + 0.5 * (1 - Math.pow(2 - 2 * t, 2));
+                                }
+                            };
+                            
+                            // Calculate current rotation
+                            const rotationProgress = easeOut(progress);
+                            this.rotation = this.startRotation + (this.spinAmount * rotationProgress);
+                            
+                            // Update element rotation - ROTATE AROUND Z AXIS
+                            this.el.setAttribute('rotation', `0 0 ${-this.rotation}`);
+                            
+                            // Check if spin is complete
+                            if (progress >= 1.0) {
+                                console.log("Spin complete via progress check");
+                                this.data.spinning = false;
+                                
+                                // Stop the sound
+                                if (this.spinSound) {
+                                    this.spinSound.pause();
+                                    this.spinSound.currentTime = 0;
+                                }
+                                
+                                // Call onSpinComplete immediately
+                                this.onSpinComplete();
+                            }
+                        } else {
+                            // Keep wheel at its current rotation when not spinning
+                            this.el.setAttribute('rotation', `0 0 ${-this.rotation}`);
+                        }
+                    },
+                    
+                    onClick: function() {
+                        // Only allow clicking if not already spinning
+                        if (!this.data.spinning && !document.getElementById('question-overlay').classList.contains('active')) {
+                            this.spin();
+                        }
+                    },
+                    
+                    // Logic to avoid repeating the same segment too often
+                    getValidSegment: function() {
+                        // Count occurrences of each segment in the history
+                        const segmentCounts = new Array(this.segments).fill(0);
+                        this.segmentHistory.forEach(segment => {
+                            segmentCounts[segment]++;
+                        });
+                        
+                        // Find segments that have appeared fewer than 2 times
+                        const validSegments = [];
+                        for (let i = 0; i < this.segments; i++) {
+                            if (segmentCounts[i] < 2) {
+                                validSegments.push(i);
+                            }
+                        }
+                        
+                        // If no valid segments (unlikely), allow any segment
+                        if (validSegments.length === 0) {
+                            for (let i = 0; i < this.segments; i++) {
+                                validSegments.push(i);
+                            }
+                        }
+                        
+                        // Randomly select from valid segments
+                        const randomIndex = Math.floor(Math.random() * validSegments.length);
+                        return validSegments[randomIndex];
+                    },
+                    
+                    spin: function() {
+                        // Reset audio state
+                        if (this.spinSound) {
+                            // Ensure any previous playback is stopped
+                            this.spinSound.pause();
+                            this.spinSound.currentTime = 0;
+                            this.spinSound.volume = 1.0;
+                            this.spinSound.loop = true;
+                            
+                            // Start playing and handle any errors
+                            this.spinSound.play().catch(error => {
+                                console.warn('Spin sound playback error:', error);
+                            });
+                        }
+                        
+                        // Set spinning parameters
+                        this.data.spinning = true;
+                        this.spinStartTime = performance.now();
+                        this.startRotation = this.rotation;
+                        
+                        // Get a valid segment using our anti-repetition logic
+                        const targetSegment = this.getValidSegment();
+                        
+                        // Calculate rotation needed to land on the selected segment
+                        // Each segment is 45 degrees (360/8)
+                        // We need to add a random offset within the segment for natural feel
+                        const segmentAngle = 45;
+                        const segmentStartAngle = targetSegment * segmentAngle;
+                        const randomOffset = Math.random() * (segmentAngle * 0.7) + (segmentAngle * 0.15); // Random position within middle 70% of segment
+                        const targetAngle = segmentStartAngle + randomOffset;
+                        
+                        // Use 2.5 rotations to match the 4-second duration
+                        const fullRotations = 2.5;
+                        this.spinAmount = (360 * fullRotations) + (360 - targetAngle);
+                        
+                        // The segment that will be selected
+                        this.selectedSegment = targetSegment;
+                        
+                        // Add to history
+                        this.segmentHistory.push(this.selectedSegment);
+                        if (this.segmentHistory.length > this.maxHistoryLength) {
+                            this.segmentHistory.shift(); // Remove oldest entry if we exceed max history
+                        }
+                        
+                        console.log("Spin started, targeting segment:", this.selectedSegment);
+                        console.log("Start rotation:", this.startRotation);
+                        console.log("Spin amount:", this.spinAmount);
+                        console.log("Final angle:", targetAngle);
+                        console.log("Segment history:", this.segmentHistory);
+                        
+                        // Dispatch custom event that the wheel is spinning
+                        document.dispatchEvent(new CustomEvent('wheel-spinning', {
+                            detail: { spinning: true }
+                        }));
+                    },
+                    
+                    onSpinComplete: function() {
+                        console.log("Spin complete, final segment:", this.selectedSegment);
+                        
+                        // Dispatch custom event with the selected segment
+                        document.dispatchEvent(new CustomEvent('wheel-stopped', {
+                            detail: { segment: this.selectedSegment }
+                        }));
+                        
+                        console.log("Dispatched wheel-stopped event with segment:", this.selectedSegment);
+                    },
+                    
+                    remove: function() {
+                        // Clean up event listeners
+                        this.el.removeEventListener('click', this.onClick);
+                        
+                        // Clean up audio resources
+                        if (this.spinSound) {
+                            this.spinSound.pause();
+                            this.spinSound.currentTime = 0;
+                            this.spinSound = null;
+                        }
+                    }
+                });
+                
+                // Update any existing instances
+                document.querySelectorAll('[wheel-spinner]').forEach(function(el) {
+                    if (el.components && el.components['wheel-spinner']) {
+                        el.components['wheel-spinner'].remove();
+                        el.setAttribute('wheel-spinner', '');
+                    }
+                });
+                
+                console.log("Wheel-spinner component override complete");
+            }, 1000); // Wait 1 second to ensure A-Frame is loaded
+        });
+    </script>
 
 </body>
 </html> 
