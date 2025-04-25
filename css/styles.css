@@ -1,0 +1,274 @@
+/* Main Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    background-color: #000;
+
+}
+
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #000, #181848);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: opacity 0.5s ease;
+}
+
+.loading-content {
+    max-width: 600px;
+    padding: 20px;
+    color: white;
+}
+
+.loading-content .logo {
+    width: 200px;
+    margin-bottom: 20px;
+}
+
+.loading-content h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #e0e0ff;
+}
+
+.loading-content p {
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #b0b0ff;
+}
+
+.loader {
+    margin: 0 auto 30px;
+    border: 5px solid rgba(255, 255, 255, 0.2);
+    border-top: 5px solid #fff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+.loading-progress {
+    width: 100%;
+    max-width: 400px;
+    height: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    margin: 15px auto;
+    overflow: hidden;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #fff;
+    transition: width 0.5s ease;
+}
+
+.loading-text {
+    color: white;
+    font-size: 14px;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#enter-button, #ar-button {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid white;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.3s ease;
+}
+
+#enter-button:hover, #ar-button:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+/* Question Overlay */
+#question-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+}
+
+.question-container {
+    background: rgba(30, 30, 60, 0.8);
+    border: 2px solid #4040ff;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 20px rgba(100, 100, 255, 0.5);
+}
+
+.question-container h2 {
+    color: #90a0ff;
+    margin-top: 0;
+    font-size: 1.5em;
+}
+
+.question-container p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+#answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.answer-btn {
+    background: rgba(80, 80, 200, 0.3);
+    color: white;
+    border: 1px solid #8080ff;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    text-align: left;
+}
+
+.answer-btn:hover {
+    background: rgba(100, 100, 220, 0.5);
+}
+
+.answer-btn.correct {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.answer-btn.incorrect {
+    background-color: #f44336; /* Red */
+    color: white;
+}
+
+#result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+#result.correct {
+    background: rgba(50, 180, 50, 0.3);
+    border: 1px solid #50c050;
+}
+
+#result.incorrect {
+    background: rgba(180, 50, 50, 0.3);
+    border: 1px solid #c05050;
+}
+
+#continue-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid white;
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#continue-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Hide/show respin button */
+.hidden-respin {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s 0.3s, opacity 0.3s linear;
+}
+
+/* Pulsing animation for respin button */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Glow effect for text and buttons without backgrounds */
+.a-text {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+/* Make sure stars are visible across the entire scene */
+.a-sky {
+    opacity: 1 !important;
+}
+
+/* Make the stars brighter */
+.a-entity[stars] {
+    opacity: 1 !important;
+}
+
+/* Styling for correct answer explanations */
+.result-correct {
+    color: #4CAF50; /* Same green color as correct answers */
+    font-weight: bold;
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+    .loading-content h1 {
+        font-size: 1.8em;
+    }
+    
+    .loading-content p {
+        font-size: 1em;
+    }
+    
+    #enter-button, #ar-button {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+    
+    .question-container {
+        padding: 20px;
+    }
+    
+    .question-container p {
+        font-size: 1em;
+    }
+} 

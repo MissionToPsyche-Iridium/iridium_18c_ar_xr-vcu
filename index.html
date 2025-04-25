@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psyche Trivia Wheel</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.3.1/dist/aframe-environment-component.min.js"></script>
+    <script src="js/wheel.js"></script>
+    <script src="js/app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        /* Loading Screen Styles */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading-content {
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        #loading-logo {
+            max-width: 250px;
+            margin-bottom: 20px;
+        }
+
+        #progress-container {
+            width: 100%;
+            background-color: #333;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            height: 20px;
+            background-color: #8a2be2;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #start-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            align-items: center;
+        }
+
+        #start-buttons button {
+            background-color: #8a2be2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            width: 200px;
+        }
+
+        #start-buttons button:hover {
+            background-color: #7a1cd2;
+        }
+
+        #credits-button {
+            background-color: #406090 !important;
+        }
+
+        #credits-button:hover {
+            background-color: #304870 !important;
+        }
+
+        /* Question Overlay Styles */
+        #question-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        
+        #question-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        #question-overlay.hidden {
+            display: none;
+        }
+        
+        .question-container {
+            background-color: rgba(10, 20, 50, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 80%;
+            text-align: center;
+            border: 2px solid #8a2be2;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+        
+        #question-category {
+            margin-top: 0;
+            color: #8a2be2;
+            font-size: 24px;
+        }
+        
+        #question-text {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        
+        #answers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .answer-btn {
+            background-color: rgba(30, 40, 80, 0.8);
+            color: white;
+            border: 1px solid #8a2be2;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: left;
+        }
+        
+        .answer-btn:hover {
+            background-color: rgba(40, 60, 120, 0.8);
+        }
+        
+        .answer-btn.correct {
+            background-color: rgba(0, 150, 50, 0.8);
+            border-color: #00ff7f;
+        }
+        
+        .answer-btn.incorrect {
+            background-color: rgba(150, 0, 50, 0.8);
+            border-color: #ff5577;
+        }
+        
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        
+        #result.correct {
+            background-color: rgba(0, 150, 50, 0.3);
+            border: 1px solid #00ff7f;
+        }
+        
+        #result.incorrect {
+            background-color: rgba(150, 0, 50, 0.3);
+            border: 1px solid #ff5577;
+        }
+        
+        #result-text {
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Credits Overlay Styles */
+        #credits-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        
+        #credits-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .credits-container {
+            background-color: rgba(10, 20, 50, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 700px;
+            width: 85%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            border: 2px solid #4a90e2;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5), 0 0 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .credits-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .credits-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .credits-container::-webkit-scrollbar-thumb {
+            background: #4a90e2;
+            border-radius: 10px;
+        }
+        
+        .credits-title {
+            color: #4a90e2;
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 0;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+
+        .credits-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(74,144,226,0), rgba(74,144,226,1), rgba(74,144,226,0));
+        }
+        
+        .credits-content {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            border-radius: 10px;
+            background-color: rgba(0, 20, 50, 0.3);
+            font-size: 14px;
+            line-height: 1.5;
+            color: #ccc;
+            text-align: left;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            grid-template-areas: 
+                "developers developers"
+                "advisor sponsor";
+            gap: 15px;
+        }
+        
+        .credits-content .developers {
+            grid-area: developers;
+        }
+        
+        .credits-content .advisor {
+            grid-area: advisor;
+        }
+        
+        .credits-content .sponsor {
+            grid-area: sponsor;
+        }
+        
+        .credits-content h3 {
+            color: #4a90e2;
+            margin-bottom: 8px;
+            font-size: 18px;
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .credits-content p {
+            margin: 4px 0;
+            font-size: 15px;
+            text-align: center;
+        }
+        
+        .credits-content div {
+            padding: 10px;
+            background-color: rgba(0, 10, 30, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        
+        .credits-disclaimer {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            border-radius: 10px;
+            background-color: rgba(0, 20, 50, 0.3);
+            font-size: 13px;
+            line-height: 1.5;
+            color: #ccc;
+            text-align: left;
+        }
+        
+        .credits-disclaimer p {
+            margin: 0;
+        }
+        
+        .close-credits {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-credits:hover {
+            color: #4a90e2;
+            background-color: rgba(74, 144, 226, 0.1);
+        }
+        
+        #credits-button {
+            background-color: rgba(40, 70, 120, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        #credits-button:hover {
+            background-color: rgba(60, 100, 180, 0.8);
+        }
+
+        /* Study Guide Overlay */
+        #study-guide-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        
+        #study-guide-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .study-guide-container {
+            background-color: rgba(10, 20, 50, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 85%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #4a90e2;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5), 0 0 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .guide-title {
+            color: #4a90e2;
+            font-size: 24px;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .guide-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(74,144,226,0), rgba(74,144,226,1), rgba(74,144,226,0));
+        }
+        
+        .guide-content {
+            color: white;
+            line-height: 1.6;
+        }
+        
+        .guide-content ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        
+        .guide-content li {
+            margin-bottom: 10px;
+        }
+        
+        #close-guide-btn {
+            background-color: rgba(40, 70, 120, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        #close-guide-btn:hover {
+            background-color: rgba(60, 100, 180, 0.8);
+        }
+        
+        /* Score Tracker Overlay */
+        #score-tracker-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        
+        #score-tracker-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .score-tracker-container {
+            background-color: rgba(10, 20, 50, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 85%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #4a90e2;
+            box-shadow: 0 0 30px rgba(74, 144, 226, 0.5), 0 0 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        .tracker-title {
+            color: #4a90e2;
+            font-size: 24px;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .tracker-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(74,144,226,0), rgba(74,144,226,1), rgba(74,144,226,0));
+        }
+        
+        .score-content {
+            color: white;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .correct-score {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+        
+        .incorrect-score {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .accuracy {
+            color: white;
+            margin-top: 15px;
+        }
+        
+        #close-tracker-btn {
+            background-color: rgba(40, 70, 120, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        #close-tracker-btn:hover {
+            background-color: rgba(60, 100, 180, 0.8);
+        }
+
+        /* Mobile controls for study guide and score */
+        .mobile-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 100;
+        }
+        
+        .mobile-btn {
+            background-color: rgba(40, 70, 120, 0.8);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Preload critical textures -->
+    <script>
+        // Preload key assets to reduce wait time
+        function preloadImages() {
+            const imagesToPreload = [
+                './assets/textures/wheel-texture-transparent.png',
+                './assets/textures/arrow.png',
+                './assets/textures/stars-bg.png',
+                './assets/textures/psyche-logo.png'
+            ];
+            
+            // Preload images with Promise.all for faster loading
+            const preloadPromises = imagesToPreload.map(src => {
+                return new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = "Anonymous";
+                    img.onload = () => resolve(src);
+                    img.onerror = () => reject(`Failed to load ${src}`);
+                    img.src = src;
+                });
+            });
+            
+            // Preload audio files
+            const audioToPreload = [
+                './assets/audio/spin.mp3',
+                './assets/audio/correct.mp3',
+                './assets/audio/incorrect.mp3'
+            ];
+            
+            const preloadAudio = audioToPreload.map(src => {
+                return new Promise((resolve, reject) => {
+                    const audio = new Audio();
+                    audio.oncanplaythrough = () => resolve(src);
+                    audio.onerror = () => reject(`Failed to load ${src}`);
+                    audio.src = src;
+                });
+            });
+            
+            // Combine all preloading promises
+            Promise.all([...preloadPromises, ...preloadAudio])
+                .then(loaded => console.log("Preloaded assets:", loaded))
+                .catch(err => console.warn("Some preloading failed:", err));
+        }
+        
+        // Start preloading immediately
+        preloadImages();
+        
+        // Fix for local file loading (CORS workaround)
+        window.fixLocalFileLoading = function() {
+            const assets = document.querySelector('a-assets');
+            
+            // Create a direct reference to the stars background
+            const starsImg = document.createElement('img');
+            starsImg.id = 'stars-bg-direct';
+            starsImg.crossOrigin = 'Anonymous';
+            starsImg.src = './assets/textures/stars-bg.png';
+            assets.appendChild(starsImg);
+            
+            // Apply the texture directly after loading
+            starsImg.onload = function() {
+                const sky = document.querySelector('#starry-sky');
+                if (sky) {
+                    sky.setAttribute('src', '#stars-bg-direct');
+                    sky.setAttribute('material', {
+                        shader: 'flat',
+                        side: 'back',
+                        repeat: '2 2',
+                        color: '#ffffff',
+                        transparent: true
+                    });
+                    console.log('Applied direct stars background reference');
+                }
+            };
+        };
+        
+        // Run the fix after a small delay
+        setTimeout(window.fixLocalFileLoading, 500);
+    </script>
+
+    <div id="loading-screen">
+        <div class="loading-content">
+            <img src="assets/textures/psyche-logo.png" alt="Psyche Mission Logo" class="logo">
+            <h1>Psyche Trivia Wheel</h1>
+            <p>Explore NASA's mission to the metal asteroid!</p>
+            <div class="loader" id="loading-spinner"></div>
+            <div class="loading-progress">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="loading-text" class="loading-text">Loading assets...</div>
+            <div id="start-buttons" class="hidden">
+                <button id="start-button">Enter Experience</button>
+                <button id="credits-button">Credits & Disclaimer</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="question-overlay" class="hidden">
+        <div class="question-container">
+            <h2 id="question-category">Category</h2>
+            <p id="question-text">Question text will appear here...</p>
+            <div id="answers">
+                <button class="answer-btn" data-index="0">Answer 1</button>
+                <button class="answer-btn" data-index="1">Answer 2</button>
+                <button class="answer-btn" data-index="2">Answer 3</button>
+                <button class="answer-btn" data-index="3">Answer 4</button>
+            </div>
+            <div id="result" class="hidden">
+                <p id="result-text">Result text here...</p>
+                <button id="continue-btn">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="credits-overlay">
+        <div class="credits-container">
+            <button class="close-credits">&times;</button>
+            <h2 class="credits-title">Credits</h2>
+            
+            <div class="credits-content">
+                <div class="developers">
+                    <h3>Developers</h3>
+                    <p>Adonias Daniel</p>
+                    <p>PsycheVerse Group</p>
+                </div>
+                <div class="advisor">
+                    <h3>Advisor</h3>
+                    <p>Rodrigo Spinola</p>
+                </div>
+                <div class="sponsor">
+                    <h3>Sponsor</h3>
+                    <p>Cassie Bowman</p>
+                </div>
+            </div>
+            
+            <h2 class="credits-title" style="margin-top: 25px;">Disclaimer</h2>
+            <div class="credits-disclaimer">
+                <p>This work was created in partial fulfillment of Virginia Commonwealth University Capstone Course "CMSC442/CMSC452″. The work is a result of the Psyche Student Collaborations component of NASA's Psyche Mission (https://psyche.asu.edu/). "Psyche: A Journey to a Metal World" [Contract number NNM16AA09C] is part of the NASA Discovery Program mission to solar system targets. Trade names and trademarks of ASU and NASA are used in this work for identification only. Their usage does not constitute an official endorsement, either expressed or implied, by Arizona State University or National Aeronautics and Space Administration. The content is solely the responsibility of the authors and does not necessarily represent the official views of ASU or NASA.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="study-guide-overlay" class="hidden">
+        <div class="study-guide-container">
+            <h2 class="guide-title">Psyche Mission Study Guide</h2>
+            <div class="guide-content">
+                <ul>
+                    <li>Composition of Psyche 16 differs from rocky bodies, consisting primarily of Fe-Ni alloys</li>
+                    <li>SpaceX vehicle utilized for October 2023 deployment from Cape Canaveral SLC-40</li>
+                    <li>Mission duration extends approximately 72 months post-launch to destination</li>
+                    <li>Hall-effect thrusters generate momentum via ionized Xe gas for transit</li>
+                    <li>Target body dimensions: ~226km diameter (1/16th lunar equivalent)</li>
+                    <li>Orbital position: 3.3 AU heliocentric distance in primary belt region</li>
+                    <li>Hypothesized to be remnant planetary differentiation structure</li>
+                    <li>Scientific payload includes fluxgate device and multispectral photometric instrumentation</li>
+                    <li>Principal investigational authority: southwestern university consortium with JPL management</li>
+                    <li>Experimental laser-based communication protocol testing during cruise phase</li>
+                </ul>
+            </div>
+            <button id="close-guide-btn">Close Guide</button>
+        </div>
+    </div>
+
+    <div id="score-tracker-overlay" class="hidden">
+        <div class="score-tracker-container">
+            <h2 class="tracker-title">Your Score</h2>
+            <div class="score-content">
+                <p id="mobile-correct-counter" class="correct-score">Correct: 0</p>
+                <p id="mobile-incorrect-counter" class="incorrect-score">Incorrect: 0</p>
+                <p id="mobile-accuracy-counter" class="accuracy">Accuracy: 0%</p>
+            </div>
+            <button id="close-tracker-btn">Close Tracker</button>
+        </div>
+    </div>
+
+    <a-scene loading-screen="enabled: false">
+        <a-assets timeout="20000">
+            <img id="wheel-texture" src="./assets/textures/wheel-texture-transparent.png" crossorigin="anonymous">
+            <img id="arrow-texture" src="./assets/textures/arrow.png" crossorigin="anonymous">
+            <img id="stars-bg" src="./assets/textures/stars-bg.png" crossorigin="anonymous">
+            <audio id="spin-sound" src="./assets/audio/spin.mp3"></audio>
+            <audio id="correct-sound" src="./assets/audio/correct.mp3"></audio>
+            <audio id="incorrect-sound" src="./assets/audio/incorrect.mp3"></audio>
+        </a-assets>
+
+        <!-- Environment -->
+        <a-entity environment="preset: starry; ground: none; skyType: gradient; skyColor: #000000; horizonColor: #000000; lighting: none; shadow: false; fog: 0; dressing: none"></a-entity>
+        
+        <!-- Remove or comment out the rotating sky -->
+        <!-- <a-sky id="starry-sky" src="#stars-bg" radius="500" rotation="0 0 0" material="shader: flat; side: back; color: #ffffff; repeat: 1 1; transparent: false"></a-sky> -->
+
+        <!-- Lighting -->
+        <a-entity light="type: ambient; color: #BBB; intensity: 1.5"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 1.0" position="-1 1 0"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="1 1 0"></a-entity>
+        
+        <!-- Main Scene Elements -->
+        <a-entity id="wheel-parent" position="0 1.4 -2">
+            <a-entity 
+                id="trivia-wheel" 
+                geometry="primitive: circle; radius: 0.7; segments: 32" 
+                position="0 0 0"
+                rotation="0 0 0"
+                material="src: #wheel-texture; side: front; shader: flat; transparent: true; npot: false; roughness: 0.2; metalness: 0.3"
+                wheel-spinner>
+            </a-entity>
+
+            <!-- Create a completely new arrow pointer with no black circle -->
+            <a-entity id="pointer-container" position="0.73 0 0.01">
+                <!-- Main white triangle only - no cylinder base -->
+                <a-entity
+                    geometry="primitive: triangle; vertexA: 0 0.1 0; vertexB: -0.07 -0.1 0; vertexC: 0.07 -0.1 0"
+                    rotation="0 0 90"
+                    material="color: #ffffff; emissive: #ffffff; emissiveIntensity: 1.0; shader: flat; flatShading: true; transparent: false">
+                </a-entity>
+            </a-entity>
+        </a-entity>
+
+        <!-- Instructions -->
+        <a-entity id="instructions" 
+            position="0 2.3 -2"
+            text="value: PSYCHE TRIVIA WHEEL\nTap the wheel to spin!; 
+                 color: white; 
+                 align: center; 
+                 width: 2;
+                 font: exo2bold">
+        </a-entity>
+
+        <!-- Camera and cursor -->
+        <a-entity camera look-controls position="0 1.6 0">
+            <a-entity cursor="fuse: false"
+              raycaster="objects: .clickable, #trivia-wheel"
+              position="0 0 -1"
+              geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+              material="color: white; shader: flat">
+            </a-entity>
+            
+            <!-- Static stars background that's always in front of the camera -->
+            <a-plane 
+                id="static-stars-bg" 
+                src="#stars-bg" 
+                position="0 0 -10" 
+                width="40" 
+                height="30" 
+                material="shader: flat; transparent: true; side: front"
+                scale="1 1 1">
+            </a-plane>
+        </a-entity>
+
+        <!-- Respin button with glow effect -->
+        <a-entity id="respin-button" 
+            position="0 0.5 -2"
+            text="value: RE-SPIN WHEEL; color: white; align: center; width: 4; wrapCount: 20; font: exo2bold; zOffset: 0.01; shader: msdf"
+            animation__idle="property: position; to: 0 0.53 -2; dir: alternate; dur: 1000; loop: true; easing: easeInOutQuad"
+            class="clickable">
+        </a-entity>
+        
+        <!-- Score Tracker Panel (right side) - moved further right and made permanent -->
+        <a-entity
+            id="score-tracker-panel"
+            position="3.2 1.6 -3"
+            rotation="0 -25 0"
+            geometry="primitive: plane; width: 1.5; height: 1.4"
+            material="color: #0d1f3e; opacity: 0.9; shader: flat"
+            class="clickable">
+            <a-entity
+                text="value: SCORE TRACKER; color: #4a90e2; align: center; width: 1.8; wrapCount: 15; font: default"
+                position="0 0.6 0.01"></a-entity>
+            <a-entity
+                id="correct-counter"
+                text="value: Correct: 0; color: #2ecc71; align: center; width: 1.8; wrapCount: 20"
+                position="0 0.25 0.01"></a-entity>
+            <a-entity
+                id="incorrect-counter"
+                text="value: Incorrect: 0; color: #e74c3c; align: center; width: 1.8; wrapCount: 20"
+                position="0 -0.05 0.01"></a-entity>
+            <a-entity
+                id="accuracy-counter"
+                text="value: Accuracy: 0%; color: white; align: center; width: 1.8; wrapCount: 20"
+                position="0 -0.35 0.01"></a-entity>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        // Loading experience
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            const progressBar = document.getElementById('progress-bar');
+            const loadingText = document.getElementById('loading-text');
+            const startButtons = document.getElementById('start-buttons');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            let sceneReady = false;
+
+            // Hide buttons initially
+            startButtons.classList.add('hidden');
+
+            // Assets to load
+            const assetsToLoad = [
+                { name: 'Wheel Texture', loaded: false },
+                { name: 'Arrow Texture', loaded: false },
+                { name: 'Ambient Sounds', loaded: false },
+                { name: 'Background Stars', loaded: false }
+            ];
+
+            // Pre-load critical assets immediately
+            const wheelTexture = document.querySelector('#wheel-texture');
+            const arrowTexture = document.querySelector('#arrow-texture');
+            const starsTexture = document.querySelector('#stars-bg');
+            
+            if (wheelTexture.complete) assetsToLoad[0].loaded = true;
+            if (arrowTexture.complete) assetsToLoad[1].loaded = true;
+            if (starsTexture.complete) assetsToLoad[3].loaded = true;
+            
+            // Event listeners for real asset loading
+            wheelTexture.addEventListener('load', () => { assetsToLoad[0].loaded = true; updateProgress(); });
+            arrowTexture.addEventListener('load', () => { assetsToLoad[1].loaded = true; updateProgress(); });
+            starsTexture.addEventListener('load', () => { assetsToLoad[3].loaded = true; updateProgress(); });
+            
+            // Check for scene loaded
+            const scene = document.querySelector('a-scene');
+            scene.addEventListener('loaded', function() {
+                console.log('A-Frame scene fully loaded');
+                sceneReady = true;
+                checkAllReady();
+            });
+
+            // Simulate loading of remaining assets
+            let loadedCount = 0;
+            
+            // Update progress display
+            function updateProgress() {
+                loadedCount = assetsToLoad.filter(asset => asset.loaded).length;
+                const progress = (loadedCount / assetsToLoad.length) * 100;
+                progressBar.style.width = progress + '%';
+                loadingText.textContent = `Loading: ${Math.round(progress)}%`;
+                
+                // Check if all assets are loaded
+                if (loadedCount === assetsToLoad.length) {
+                    loadingComplete();
+                }
+            }
+            
+            // Handle loading completion
+            function loadingComplete() {
+                loadingText.textContent = 'Ready to launch!';
+                loadingSpinner.style.display = 'none'; // Hide the circular loader
+                startButtons.classList.remove('hidden');
+                applyTextures(); // Pre-apply textures while on loading screen
+                checkAllReady();
+            }
+            
+            // Make sure everything is truly ready before proceeding
+            function checkAllReady() {
+                if (loadedCount === assetsToLoad.length && sceneReady) {
+                    console.log('Both assets and scene are fully ready');
+                    
+                    // Pre-apply textures one more time to be certain
+                    applyTextures();
+                }
+            }
+            
+            // Start the loading process for any remaining assets
+            // Only use timeout for assets we can't track directly
+            setTimeout(() => {
+                if (!assetsToLoad[2].loaded) {
+                    assetsToLoad[2].loaded = true;
+                    updateProgress();
+                }
+            }, 2000);
+
+            // Initialize score tracking
+            let correctAnswers = 0;
+            let incorrectAnswers = 0;
+            let answersSelected = false;
+            
+            // Update score display function
+            function updateScoreDisplay() {
+                const totalAnswers = correctAnswers + incorrectAnswers;
+                const accuracy = totalAnswers > 0 ? Math.round((correctAnswers / totalAnswers) * 100) : 0;
+                
+                // Update 3D panel
+                document.getElementById('correct-counter').setAttribute('text', 'value: Correct: ' + correctAnswers);
+                document.getElementById('incorrect-counter').setAttribute('text', 'value: Incorrect: ' + incorrectAnswers);
+                document.getElementById('accuracy-counter').setAttribute('text', 'value: Accuracy: ' + accuracy + '%');
+                
+                // Update mobile overlay
+                document.getElementById('mobile-correct-counter').textContent = 'Correct: ' + correctAnswers;
+                document.getElementById('mobile-incorrect-counter').textContent = 'Incorrect: ' + incorrectAnswers;
+                document.getElementById('mobile-accuracy-counter').textContent = 'Accuracy: ' + accuracy + '%';
+            }
+
+            // Global wheel-stopped event handler - placed outside the start button click handler
+            document.addEventListener('wheel-stopped', function(event) {
+                console.log('Wheel stopped event received with segment:', event.detail.segment);
+                
+                // Reset answer selection flag for new question
+                answersSelected = false;
+                
+                // Get the trivia data
+                const triviaData = window.triviaData || {
+                    categories: [
+                        "Mission Basics",
+                        "Launch",
+                        "Spacecraft",
+                        "Science",
+                        "Asteroid Facts",
+                        "Mission Journey",
+                        "Team & Partners",
+                        "Space Technology"
+                    ],
+                    questions: []
+                };
+                
+                // Get the selected segment
+                const segmentIndex = event.detail.segment;
+                console.log("Wheel stopped at segment index:", segmentIndex);
+                
+                // Map the segment to the corresponding category
+                const categoryName = triviaData.categories[segmentIndex];
+                console.log("Category name from segment:", categoryName);
+                
+                // Get a random question from the category
+                if (triviaData.questions && triviaData.questions[segmentIndex] && triviaData.questions[segmentIndex].length > 0) {
+                    const categoryQuestions = triviaData.questions[segmentIndex];
+                    const randomIndex = Math.floor(Math.random() * categoryQuestions.length);
+                    const question = categoryQuestions[randomIndex];
+                    
+                    console.log("Selected question:", question);
+                    
+                    // Set question content with EXACT category name from the wheel
+                    document.getElementById('question-category').textContent = categoryName;
+                    document.getElementById('question-text').textContent = question.question;
+                    
+                    // Set answer options
+                    const answerButtons = document.querySelectorAll('.answer-btn');
+                    answerButtons.forEach((button, index) => {
+                        button.textContent = question.answers[index];
+                        button.classList.remove('correct', 'incorrect');
+                        button.disabled = false; // Enable all buttons for the new question
+                        
+                        // Add answer click handlers
+                        button.onclick = function() {
+                            // Only allow one answer selection per question
+                            if (answersSelected) return;
+                            answersSelected = true;
+                            
+                            const selectedIndex = parseInt(this.dataset.index);
+                            const correctIndex = question.correctIndex;
+                            const isCorrect = selectedIndex === correctIndex;
+                            
+                            // Clear previous selections
+                            answerButtons.forEach(btn => {
+                                btn.classList.remove('correct', 'incorrect');
+                                btn.disabled = true; // Disable all buttons after selection
+                            });
+                            
+                            // Mark correct and incorrect answers
+                            answerButtons[correctIndex].classList.add('correct');
+                            if (!isCorrect) {
+                                this.classList.add('incorrect');
+                            }
+                            
+                            // Update score
+                            if (isCorrect) {
+                                correctAnswers++;
+                            } else {
+                                incorrectAnswers++;
+                            }
+                            updateScoreDisplay();
+                            
+                            // Show result
+                            const resultDiv = document.getElementById('result');
+                            resultDiv.classList.remove('hidden');
+                            
+                            // Create result message
+                            let resultMessage = '';
+                            if (isCorrect) {
+                                resultMessage = `✓ Correct! <span class="result-correct">${question.explanation}</span>`;
+                                try {
+                                    document.querySelector('#correct-sound').play();
+                                } catch (e) {
+                                    console.warn('Audio error:', e);
+                                }
+                            } else {
+                                resultMessage = `✗ Incorrect. The correct answer is "${question.answers[correctIndex]}". ${question.explanation}`;
+                                try {
+                                    document.querySelector('#incorrect-sound').play();
+                                } catch (e) {
+                                    console.warn('Audio error:', e);
+                                }
+                            }
+                            
+                            // Update result text
+                            document.getElementById('result-text').innerHTML = resultMessage;
+                        };
+                    });
+                    
+                    // Reset result div
+                    const resultDiv = document.getElementById('result');
+                    resultDiv.classList.add('hidden');
+                    
+                    // Show question overlay
+                    const questionOverlay = document.getElementById('question-overlay');
+                    questionOverlay.classList.remove('hidden');
+                    setTimeout(() => questionOverlay.classList.add('active'), 50);
+                    
+                    // Add continue button handler
+                    document.getElementById('continue-btn').onclick = function() {
+                        document.getElementById('result').classList.add('hidden');
+                        questionOverlay.classList.remove('active');
+                        setTimeout(() => questionOverlay.classList.add('hidden'), 500);
+                        
+                        // Show respin button
+                        document.getElementById('respin-button').setAttribute('visible', 'true');
+                    };
+                } else {
+                    console.error('No questions available for segment:', segmentIndex);
+                }
+            });
+            
+            // Improved transition from loading screen to experience
+            document.getElementById('start-button').addEventListener('click', function() {
+                console.log("Start button clicked!");
+                
+                // Remove loading screen immediately and completely
+                loadingScreen.style.display = 'none';
+                
+                // Ensure scene is visible and interactive
+                const sceneEl = document.querySelector('a-scene');
+                if (sceneEl) {
+                    sceneEl.style.zIndex = '1';
+                    sceneEl.style.position = 'relative';
+                    sceneEl.focus();
+                }
+                
+                // Force apply textures
+                applyTextures();
+                
+                // Make sure the wheel is visible and interactive
+                const wheel = document.querySelector('#trivia-wheel');
+                if (wheel) {
+                    wheel.setAttribute('visible', 'true');
+                }
+                
+                // Re-register click handlers for the wheel if needed
+                const wheelComponent = wheel.components['wheel-spinner'];
+                if (wheelComponent && typeof wheelComponent.registerClickHandler === 'function') {
+                    wheelComponent.registerClickHandler();
+                }
+                
+                console.log("Transition completed - experience should be visible now");
+            });
+            
+            // Credits overlay functionality
+            const creditsButton = document.getElementById('credits-button');
+            const creditsOverlay = document.getElementById('credits-overlay');
+            const closeCredits = document.querySelector('.close-credits');
+
+            creditsButton.addEventListener('click', function() {
+                creditsOverlay.classList.add('active');
+            });
+
+            closeCredits.addEventListener('click', function() {
+                creditsOverlay.classList.remove('active');
+            });
+
+            // Mobile study guide and score handlers
+            document.getElementById('show-guide-btn').addEventListener('click', function() {
+                document.getElementById('study-guide-overlay').classList.remove('hidden');
+                setTimeout(() => document.getElementById('study-guide-overlay').classList.add('active'), 50);
+            });
+            
+            document.getElementById('close-guide-btn').addEventListener('click', function() {
+                document.getElementById('study-guide-overlay').classList.remove('active');
+                setTimeout(() => document.getElementById('study-guide-overlay').classList.add('hidden'), 500);
+            });
+            
+            // Initialize score display
+            updateScoreDisplay();
+        });
+      
+      window.addEventListener('load', function() {
+        console.log("Checking texture loading status:");
+        
+        const wheelTexture = document.querySelector('#wheel-texture');
+        console.log("Wheel texture loaded:", wheelTexture.complete);
+        
+        const arrowTexture = document.querySelector('#arrow-texture');
+        console.log("Arrow texture loaded:", arrowTexture.complete);
+        
+        const starsTexture = document.querySelector('#stars-bg');
+        console.log("Stars texture loaded:", starsTexture.complete);
+        
+        // Apply textures consistently
+        function applyTextures() {
+          // Apply to wheel
+          document.querySelector('#trivia-wheel').setAttribute('material', {
+            src: '#wheel-texture',
+            side: 'front',
+            shader: 'flat',
+            transparent: true,
+            npot: false,
+            roughness: 0.2,
+            metalness: 0.3
+          });
+          
+          // Make sure the arrow child entity is pure white
+          const arrowElement = document.querySelector('#pointer-container > a-entity:first-child');
+          if (arrowElement) {
+            arrowElement.setAttribute('material', {
+              color: '#ffffff',
+              emissive: '#ffffff',
+              emissiveIntensity: 1.0,
+              shader: 'flat',
+              flatShading: true,
+              transparent: false,
+              src: null
+            });
+          }
+      
+          // Apply to static background plane instead of sky
+          document.querySelector('#static-stars-bg').setAttribute('src', '#stars-bg');
+          document.querySelector('#static-stars-bg').setAttribute('material', {
+            shader: 'flat',
+            side: 'front',
+            transparent: true,
+            color: '#ffffff'
+          });
+          
+          console.log("Applied textures programmatically");
+        }
+        
+        // Apply on load
+        applyTextures();
+        
+        // Apply again after delay to ensure loading
+        setTimeout(applyTextures, 1000);
+        
+        // Final apply after scene is fully loaded
+        document.querySelector('a-scene').addEventListener('loaded', function() {
+          console.log("Scene fully loaded, applying textures again");
+          applyTextures();
+          
+          // Force direct loading if needed
+          if (!document.querySelector('#trivia-wheel').getObject3D('mesh').material.map) {
+            console.log("Using direct texture loading as fallback");
+            
+            // Create textures directly with THREE.js
+            const textureLoader = new THREE.TextureLoader();
+            
+                textureLoader.load('./assets/textures/wheel-texture-transparent.png', function(texture) {
+              const wheelMesh = document.querySelector('#trivia-wheel').getObject3D('mesh');
+              if (wheelMesh && wheelMesh.material) {
+                wheelMesh.material.map = texture;
+                wheelMesh.material.transparent = true;
+                wheelMesh.material.needsUpdate = true;
+              }
+            });
+            
+            textureLoader.load('./assets/textures/arrow.png', function(texture) {
+                  // Don't apply texture to the arrow - ensure arrow stays white
+                  const arrowElement = document.querySelector('#pointer-container > a-entity:first-child');
+                  if (arrowElement) {
+                    const arrowMesh = arrowElement.getObject3D('mesh');
+              if (arrowMesh && arrowMesh.material) {
+                      // Force it to be white
+                      arrowMesh.material.map = null;
+                      arrowMesh.material.color.set('#ffffff');
+                      arrowMesh.material.emissive.set('#ffffff');
+                      arrowMesh.material.emissiveIntensity = 1.0;
+                arrowMesh.material.needsUpdate = true;
+                      
+                      console.log("Arrow set to white with no texture");
+                    }
+              }
+            });
+            
+            textureLoader.load('./assets/textures/stars-bg.png', function(texture) {
+              const staticBg = document.querySelector('#static-stars-bg');
+              if (staticBg && staticBg.getObject3D('mesh').material) {
+                staticBg.getObject3D('mesh').material.map = texture;
+                staticBg.getObject3D('mesh').material.side = THREE.BackSide;
+                staticBg.getObject3D('mesh').material.needsUpdate = true;
+                    console.log("Applied stars background directly via THREE.js");
+                  }
+                });
+              }
+            });
+            
+            // Add a direct fallback for the stars background
+            setTimeout(function() {
+              const staticBg = document.querySelector('#static-stars-bg');
+              if (staticBg && !staticBg.getObject3D('mesh').material.map) {
+                  console.log("Using generated star field as final fallback");
+                  
+                  // Create a canvas with stars
+                  const canvas = document.createElement('canvas');
+                  canvas.width = 2048;
+                  canvas.height = 2048;
+                  const ctx = canvas.getContext('2d');
+                  
+                  // Black background
+                  ctx.fillStyle = '#000000';
+                  ctx.fillRect(0, 0, canvas.width, canvas.height);
+                  
+                  // Draw stars
+                  for (let i = 0; i < 2000; i++) {
+                      const x = Math.random() * canvas.width;
+                      const y = Math.random() * canvas.height;
+                      const radius = Math.random() * 1.5 + 0.5;
+                      
+                      // Star color (white with slight variations)
+                      const brightness = 150 + Math.floor(Math.random() * 105);
+                      const color = `rgb(${brightness}, ${brightness}, ${brightness + Math.floor(Math.random() * 20)})`;
+                      
+                      ctx.beginPath();
+                      ctx.arc(x, y, radius, 0, Math.PI * 2);
+                      ctx.fillStyle = color;
+                      ctx.fill();
+                  }
+                  
+                  // Add a few brighter stars
+                  for (let i = 0; i < 100; i++) {
+                      const x = Math.random() * canvas.width;
+                      const y = Math.random() * canvas.height;
+                      const radius = Math.random() * 2 + 1;
+                      
+                      // Create a gradient for a glowing effect
+                      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius * 2);
+                      gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                      gradient.addColorStop(0.5, 'rgba(240, 240, 255, 0.6)');
+                      gradient.addColorStop(1, 'rgba(220, 220, 255, 0)');
+                      
+                      ctx.beginPath();
+                      ctx.arc(x, y, radius * 2, 0, Math.PI * 2);
+                      ctx.fillStyle = gradient;
+                      ctx.fill();
+                  }
+                  
+                  // Apply to static background
+                  try {
+                      const starsDataUrl = canvas.toDataURL('image/png');
+                      staticBg.setAttribute('material', { 
+                          src: starsDataUrl,
+                          shader: 'flat',
+                          side: 'front',
+                          transparent: true,
+                          color: '#ffffff'
+                      });
+                      
+                      // Also apply directly to THREE.js
+                      const bgMesh = staticBg.getObject3D('mesh');
+                      if (bgMesh && bgMesh.material) {
+                          const texture = new THREE.Texture(canvas);
+                          texture.needsUpdate = true;
+                          bgMesh.material.map = texture;
+                          bgMesh.material.needsUpdate = true;
+                      }
+                  } catch (e) {
+                      console.error("Failed to create fallback star field:", e);
+                  }
+              }
+          }, 3000);
+      });
+    </script>
+
+    <div class="mobile-controls">
+        <button id="show-guide-btn" class="mobile-btn">Study Guide</button>
+    </div>
+
+</body>
+</html> 
