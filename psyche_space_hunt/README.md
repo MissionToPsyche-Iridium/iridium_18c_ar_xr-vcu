@@ -1,4 +1,5 @@
-to run locally:
+to run:
+
 
 download all files and cd into folder
 
