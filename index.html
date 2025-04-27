@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Immerse Into Psyche</title>
+    <link rel="icon" href="assets/textures/psyche-texture.png" type="image/png">
+    <meta name="description" content="Observe 16-PSYCHE">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preload" href="assets/space.png" as="image">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/super-hands@^3.0.5/dist/super-hands.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: url('assets/space.png') no-repeat center center fixed;
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: black;
+        font-family: 'Roboto Mono', monospace;
+        overflow: hidden;
+      }
+
+      #overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        transition: opacity 2s ease;
+      }
+      #overlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #overlay-text {
+        font-size: 4vw; /* Responsive font size */
+        font-weight: 100;
+        color: orange;
+        text-align: center;
+      }
+      #psyche-span {
+        font-size: 15vw; /* Responsive font size */
+        font-weight: 200;
+        color: orange;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      #logos {
+        position: absolute;
+        bottom: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 40px;
+      }
+      #logos img {
+        height: 50px;
+        width: auto;
+      }
+      #logos .divider {
+        width: 2px;
+        height: 40px;
+        border-radius: 4px;
+        background-color: orange;
+      }
+
+      #explore-button {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        font-size: 18px;
+        color: white;
+        border: white 2px solid;
+        background-color: #000000;
+        cursor: pointer;
+        z-index: 10; /* Ensure the button is above the scene */
+      }
+      #explore-button:hover {
+        border: orange 2px solid;
+        color: orange;
+      }
+
+      #buttons{
+        display: flex;
+        flex-direction: row;
+      }
+      #start-button {
+        font-size: 20px;
+        background-color: black;
+        border: orange 2px solid;
+        border-radius: 4px;
+        color: orange;
+
+        margin: 1rem;
+        width: 10rem;
+        height: min-content;
+      }
+      #start-button:hover {
+        background-color: orange;
+        border: orange 2px solid;
+        border-radius: 4px;
+        color: black;
+      }
+      #credits-button {
+        font-size: 20px;
+        background-color: black;
+        border: blue 2px solid;
+        border-radius: 4px;
+        color: blue;
+
+        margin: 1rem;
+        width: 10rem;
+        height: min-content;
+      }
+      #credits-button:hover {
+        background-color: blue;
+        border: blue 2px solid;
+        border-radius: 4px;
+        color: black;
+        height: min-content;
+      }
+    </style>
+    
+      <script>
+        // Request motion permissions on iOS
+        document.addEventListener('DOMContentLoaded', () => {
+          if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission()
+              .then((response) => {
+                if (response === 'granted') {
+                  console.log('Motion permission granted.');
+                } else {
+                  console.log('Motion permission denied.');
+                }
+              })
+              .catch((error) => {
+                console.error('Error requesting motion permission:', error);
+              });
+          } else {
+            console.log('DeviceMotionEvent.requestPermission is not required or not supported.');
+          }
+        });
+      </script>
+  </head>
+  <body>
+    <div id="overlay"">
+      <div id="overlay-text">NASA's Mission To A Metal World:</div>
+      <span id="psyche-span">PSYCHE</span>
+      <!-- Buttons -->
+      <div id="buttons">
+        <button id="start-button"  onclick="hideOverlay()">Start</button>
+        <button id="credits-button" onclick="showCredits()">Disclaimer</button>
+      </div>
+      <div id="logos">
+        <img src="assets/nasa-logo.svg" alt="NASA Logo">
+        <div class="divider"></div>
+        <img src="assets/psyche-logo.svg" alt="Psyche Logo">
+      </div>
+    </div>
+    <a-scene loading-screen="dotsColor: red; backgroundColor: black">
+      <a-assets>
+        <img id="star-background" src="assets/space.png">
+        <a-asset-item id="psyche" src="assets/objects/psyche-asteroid.obj"></a-asset-item>
+        <img id="psyche-texture" src="assets/textures/psyche-texture.png">
+      </a-assets>
+
+      <script>
+        function hideOverlay() {
+          const overlay = document.getElementById('overlay');
+          overlay.classList.add('hidden');
+        }
+        function showCredits() {
+          const creditsButton = document.getElementById('credits-button');
+          const creditsText = `
+            <div style="display: flex; flex-direction: column; gap: 20px; text-align: left;">
+              <!-- Disclaimer Section -->
+              <div style="font-weight: bold; color: red;">
+                Disclaimer:
+              </div>
+              <!-- Message Section -->
+              <div>
+                This work was created in partial fulfillment of Virginia Commonwealth University Capstone Course “CMSC442/CMSC452″.
+                The work is a result of the Psyche Student Collaborations component of NASA's Psyche
+                Mission (https://psyche.asu.edu). “Psyche: A Journey to a Metal World” [Contract number NNM16AA09C] is part
+                of the NASA Discovery Program mission to solar system targets. Trade names and trademarks of ASU and NASA
+                are used in this work for identification only. Their usage does not constitute an official endorsement,
+                either expressed or implied, by Arizona State University or National Aeronautics and Space Administration.
+                The content is solely the responsibility of the authors and does not necessarily represent the official
+                views of ASU or NASA.
+              </div>
+            </div>
+          `;
+
+          // Enlarge the button and display the credits text
+          creditsButton.style.transition = 'all 0.5s ease'; // Smooth animation
+          creditsButton.style.transformOrigin = 'bottom center'; // Set the origin to bottom center
+          creditsButton.style.position = 'relative'; // Ensure the button can be shifted
+          creditsButton.style.top = '-4rem'; // Shift the button upwards as it expands
+          creditsButton.style.width = '42rem';
+          creditsButton.style.height = '10rem';
+          creditsButton.style.fontSize = '12px';
+          creditsButton.style.whiteSpace = 'normal';
+          creditsButton.style.backgroundColor = 'black';
+          creditsButton.style.color = 'blue';
+          creditsButton.innerHTML = creditsText; // Set the credits text
+
+          // Add a click listener to the overlay to collapse the box
+          overlay.addEventListener('click', collapseCredits);
+        }
+
+        function collapseCredits(event) {
+          const creditsButton = document.getElementById('credits-button');
+          const overlay = document.getElementById('overlay');
+
+          // Ensure the click is outside the credits button
+          if (event.target !== creditsButton) {
+            creditsButton.style.position = 'static';
+            creditsButton.style.transition = 'all 0.5s ease'; // Smooth animation
+            creditsButton.style.width = '10rem';
+            creditsButton.style.height = 'min-content';
+            creditsButton.style.fontSize = '20px';
+            creditsButton.innerText = 'Disclaimer'; // Reset the button text
+            creditsButton.style.cursor = 'pointer'; // Re-enable pointer cursor
+
+            // Remove the click listener from the overlay
+            overlay.removeEventListener('click', collapseCredits);
+          }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+          const scene = document.querySelector('a-scene');
+          const overlay = document.getElementById('overlay');
+          const vrOverlay = document.getElementById('vr-overlay');
+
+          // Hide HTML overlay and show VR overlay when entering VR mode
+          scene.addEventListener('enter-vr', () => {
+            overlay.style.display = 'none'; // Hide HTML overlay
+            vrOverlay.setAttribute('visible', true); // Show VR overlay
+          });
+
+          // Show HTML overlay and hide VR overlay when exiting VR mode
+          scene.addEventListener('exit-vr', () => {
+            overlay.style.display = 'block'; // Show HTML overlay
+            vrOverlay.setAttribute('visible', false); // Hide VR overlay
+          });
+        });
+      </script>
+
+      <!-- Directional Light -->
+      <a-entity light="type: directional; intensity: 10; color: white" position="-1 2 1"></a-entity>
+
+      <!-- Light for Psyche Mission Border -->
+      <a-entity light="type: point; intensity: 30; color: white" position="0 2 -6"></a-entity>
+
+      <!-- Light for Asteroid Border -->
+      <a-entity light="type: point; intensity: 30; color: white" position="6 2 -4"></a-entity>
+
+      <!-- Rotating Asteroid -->
+      <a-entity id="asteroid" obj-model="obj: #psyche" position="0 -1 -5" scale="0.5 0.5 0.5" rotation="0 0 0" 
+        material="src: #psyche-texture; color: white; metalness: 0.8; roughness: 0.4; emissive: #555; emissiveIntensity: 0.02"
+        animation="property: rotation; to: 360 360 360; loop: true; dur: 20000; easing: linear">
+      </a-entity>
+
+      <a-entity position="0 1.5 -6">
+        <!-- Border (a-plane) -->
+        <a-plane position="0 0 -0.02" width="6.4" height="6.5" color="orange"></a-plane>
+        <!-- Background (a-plane) -->
+        <a-plane position="0 0 -0.01" width="6.3" height="6.4" color="black"></a-plane>
+        <!-- Text -->
+        <a-text value="Psyche Mission \n\n
+                      NASA and ASU are conducting research on a metal rich asteroid named 'Psyche'\n
+                      Because of the complexity of the information, we were tasked with creating WebXR and VR experiences to educate the public about the mission\n
+                      We are choosing to use Unity to create WebXR/AR/VR experiences with different facts pulled from papers.\n
+                      These experiences are to be used in museums and learning environments all around the world\n\n
+                      Look Around..."
+                color="white" width="6" align="center"></a-text>
+      </a-entity>
+      <a-entity position="6 0.5 -2" rotation="0 -50 0">
+        <!-- Border (a-plane) -->
+        <a-plane position="0 0 -0.02" width="6.4" height="6.5" color="orange"></a-plane>
+        <!-- Background (a-plane) -->
+        <a-plane position="0 0 -0.01" width="6.3" height="6.4" color="black"></a-plane>
+        <!-- Text -->
+        <a-text value="The Asteroid\n\n\n
+        Only the 16th asteroid to be discovered, Psyche was found in 1852 by Italian astronomer Annibale de Gasparis, who named it for the goddess of the soul in ancient Greek mythology.\n
+        What gives asteroid Psyche great scientific interest is that it is likely rich in metal.\n
+        It may consist largely of metal from the core of a planetesimal, one of the building blocks of the Sun’s planetary system.\n
+        At Psyche scientists will explore, for the first time ever, a world made not of rock or ice, but rich in metal."
+                color="white" width="6" align="center"></a-text>
+      </a-entity>
+      <a-entity position="-6 0.5 -2" rotation="0 50 0">
+        <!-- Border (a-plane) -->
+        <a-plane position="0 0 -0.02" width="6.4" height="6.5" color="orange"></a-plane>
+        <!-- Background (a-plane) -->
+        <a-plane position="0 0 -0.01" width="6.3" height="6.4" color="black"></a-plane>
+        <!-- Text -->
+        <a-text value="\nThe Spacecraft\n
+        The Psyche spacecraft and solar panels, built by Maxar Technologies, are about the size of a singles tennis court\n\nThe body of the spacecraft is slightly bigger than a small van and about as tall as a regulation basketball hoop.\n
+        The spacecraft includes a Gamma-Ray and Neutron Spectrometer, a Multispectral Imager, a Magnetometer and an x-band radio telecommunications system.\n\n
+        The Psyche mission is also testing a sophisticated new laser communication technology, called Deep Space Optical Communication, that encodes data in photons to communicate between a probe in deep space and Earth.\n\n"
+                color="white" width="6" align="center"></a-text>
+      </a-entity>
+      <a-entity id="explore-button" position="0 -1 -2.5" rotation="-10 0 0 " visible="false">
+        <a-plane width="3.1" height="0.6" color="#fff" class="clickable" position="0 0 -.01"></a-plane>
+        <a-plane width="3" height="0.5" color="#000" class="clickable"
+                 event-set__mouseenter="scale: 1.1 1.1 1"
+                 event-set__mouseleave="scale: 1 1 1"
+                 event-set__click="color: #333"
+                 onclick="explorePsyche()"></a-plane>
+        <a-text value="Click to learn more about Psyche" color="white" align="center" position="0 0 0.01" width="4"></a-text>
+        <a-light type="point" intensity="1" color="#ffffff" position="0 0 0.5" distance="1"></a-light>
+      </a-entity>
+      
+      <!-- Camera -->
+      <a-camera id="camera" position="0 0 0" look-controls="pointerLockEnabled: false; magicWindowTrackingEnabled: true" 
+      raycaster="objects: .clickable; far: 20" cursor="fuse: false; rayOrigin: mouse"></a-camera>
+      
+      <!-- CONTROLLER OR HANDS -->
+      <script>
+        // IF VR, automatically load as VR
+        document.addEventListener('DOMContentLoaded', () => {
+          const scene = document.querySelector('a-scene');
+
+          // Check if the browser supports WebXR or WebVR
+          if (scene && scene.renderer.xr && navigator.xr) {
+            navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+              if (supported) {
+                // Automatically enter VR mode
+                scene.enterVR();
+                console.log('Automatically entering VR mode.');
+              } else {
+                console.log('VR is not supported on this device.');
+              }
+            });
+          } else {
+            console.log('WebXR or WebVR is not supported in this browser.');
+          }
+        });
+        // Function to enable or disable hand tracking and controllers
+        function updateControlMode() {
+          const leftHand = document.querySelector('#left-hand');
+          const rightHand = document.querySelector('#right-hand');
+          const leftHandTracking = document.querySelector('#left-hand-tracking');
+          const rightHandTracking = document.querySelector('#right-hand-tracking');
+
+          // Check if controllers are connected
+          const controllers = Array.from(navigator.getGamepads()).filter((gamepad) => gamepad !== null);
+
+          if (controllers.length > 0) {
+            // Enable controller functionality
+            leftHand.setAttribute('visible', true);
+            rightHand.setAttribute('visible', true);
+            leftHandTracking.setAttribute('visible', false);
+            rightHandTracking.setAttribute('visible', false);
+          } else {
+            // Enable hand tracking functionality
+            leftHand.setAttribute('visible', false);
+            rightHand.setAttribute('visible', false);
+            leftHandTracking.setAttribute('visible', true);
+            rightHandTracking.setAttribute('visible', true);
+          }
+        }
+
+        // Listen for controller connection and disconnection events
+        window.addEventListener('gamepadconnected', updateControlMode);
+        window.addEventListener('gamepaddisconnected', updateControlMode);
+
+        // Initial check on page load
+        document.addEventListener('DOMContentLoaded', updateControlMode);
+      </script>
+      <!-- Left Hand Controller -->
+      <a-entity id="left-hand" laser-controls="hand: left" 
+      raycaster="objects: .clickable; interval: 100; far: 10" 
+      line="color: orange; opacity: 0.75"></a-entity>
+  
+      <!-- Right Hand Controller (Camera Rotation) -->
+      <a-entity id="right-hand" laser-controls="hand: right" 
+        raycaster="objects: .clickable; interval: 100; far: 10" 
+        line="color: orange; opacity: 0.75"></a-entity>
+    
+      <!-- Left Hand Tracking with Laser -->
+      <a-entity id="left-hand-tracking" hand-tracking-controls="hand: left" 
+        raycaster="objects: .clickable; interval: 100; far: 10" 
+        line="color: orange; opacity: 0.75" visible="false"></a-entity>
+    
+      <!-- Right Hand Tracking with Laser -->
+      <a-entity id="right-hand-tracking" hand-tracking-controls="hand: right" 
+        raycaster="objects: .clickable; interval: 100; far: 10" 
+        line="color: orange; opacity: 0.75" visible="false"></a-entity>
+    </a-scene>
+    
+    <button id="explore-button" onclick="explorePsyche()">Click To Learn More About The Psyche Mission</button>
+    <script>
+      // Background sound using Howler.js
+      const backgroundSound = new Howl({
+        src: ['soundtrack/space-by-sebastian-blanco.m4a'], // Path to your audio file
+        loop: true, // Enable looping
+        volume: 0.5, // Set volume
+        onload: () => {
+          console.log("Sound loaded and ready to play");
+        },
+        onplay: () => {
+          console.log("Space - Sebastian Blanco is playing");
+        }
+      });
+
+      // Function to start the audio after user interaction
+      function startBackgroundSound() {
+        if (!backgroundSound.playing()) {
+          backgroundSound.play();
+        }
+      }
+
+      // Add event listeners for user interaction
+      document.addEventListener('click', startBackgroundSound);
+      document.addEventListener('touchstart', startBackgroundSound);
+
+      function explorePsyche() {
+        window.location.href = "explore.html";
+      }
+
+      // Function to redirect to the explore page
+      function explorePsyche() {
+        window.location.href = "explore.html";
+      }
+
+      // Show the 3D button only in VR mode
+      const scene = document.querySelector('a-scene');
+      const exploreButton = document.getElementById('explore-button');
+
+      scene.addEventListener('enter-vr', () => {
+        exploreButton.setAttribute('visible', true); // Show the button in VR mode
+      });
+
+      scene.addEventListener('exit-vr', () => {
+        exploreButton.setAttribute('visible', false); // Hide the button when exiting VR mode
+      });
+    </script>
+  </body>
+</html>
