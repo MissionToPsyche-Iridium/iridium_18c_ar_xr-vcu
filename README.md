@@ -45,8 +45,8 @@ PsycheProject/
 ## Project Contributors
 
 **Primary Devolper:** Adonias Daniel
-
 **Team Members:** Santiago Blanco, Ankita Sahu, Andre Smith
+
 **Faculty Advisor:** Rodrigo Spinola, Ph.D.  
 **Mentor:** Cassie Bowman, Ed.D.  
 **Sponsor:** NASA Psyche Mission  
