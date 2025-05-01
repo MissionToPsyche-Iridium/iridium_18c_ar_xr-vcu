@@ -4,8 +4,6 @@ An interactive suite of WebXR experiences designed to promote public engagement 
 
 This project was created as part of the Virginia Commonwealth University Capstone Course **CMSC 451**, in collaboration with NASA’s Psyche Student Collaborations program.
 
----
-
 
 ## The Psyche Trivia Wheel  
 
@@ -43,18 +41,11 @@ PsycheProject/
     └── audio/           # Sound effects
 ```
 
----
-
 
 ## Project Contributors
 
-### Devolpers
-
-- **Adonias Daniel** 
-- **Santiago Blanco** 
-- **Ankita Sahu**
-- **Andre Smith** 
-
+**Primary Devolper:** Adonias Daniel,
+**Team Members:** Santiago Blanco, Ankita Sahu, Andre Smith
 **Faculty Advisor:** Rodrigo Spinola, Ph.D.  
 **Mentor:** Cassie Bowman, Ed.D.  
 **Sponsor:** NASA Psyche Mission  
