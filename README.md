@@ -47,6 +47,7 @@ PsycheProject/
 ## Project Contributors
 
 ### Devolpers
+
 - **Adonias Daniel** 
 - **Santiago Blanco** 
 - **Ankita Sahu**
