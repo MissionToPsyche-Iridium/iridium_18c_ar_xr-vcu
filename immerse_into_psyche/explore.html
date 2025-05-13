@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Immerse Into Psyche</title>
+    <link rel="icon" href="assets/textures/psyche-texture.png" type="image/png">
+    <script src="https://aframe.io/releases/1.7.0/aframe.min.js"></script>
+    <script src="https://unpkg.com/super-hands@^3.0.5/dist/super-hands.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/feiss/aframe-html-shader@1.0.0/dist/aframe-html-shader.min.js"></script>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgb(27, 2, 33);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-family: 'Times New Roman', Times, serif;
+      }
+      .button {
+        padding: 10px 20px;
+        font-size: 18px;
+        color: white;
+        background-color: #ff0000;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px;
+      }
+      .button:hover {
+        background-color: #ff0000;
+      }
+    </style>
+  </head>
+  <body>
+    <a-scene loading-screen="dotsColor: red; backgroundColor: black">
+      <a-assets>
+        <a-sound id="background-music" src="soundtrack/space-by-sebastian-blanco.m4a" autoplay></a-sound>
+        <img id="brushed-metal-texture" src="assets/textures/Brushed-Metal-Texture.jpg">
+        <img id="dark-tiles-texture" src="assets/textures/Tiles129B_2K-JPG_Color.jpg">
+        <img id="white-walls" src="assets/textures/white-walls.jpg">
+        <img id="star-background" src="assets/space.png">
+        <img id="switches-buttons" src="assets/textures/switches-buttons.jpg">
+        <img id="detail-hud" src="assets/Texturelabs_Details_181M.jpg">
+
+        <img id="multispectral-image" src="assets/psyche-images/multispectral-imager.avif" />
+        <img id="spectrometer-image" src="assets/psyche-images/spectrometer.avif" />
+        <img id="magnetometer-image" src="assets/psyche-images/magnetometer.avif" />
+        <img id="radio-image" src="assets/psyche-images/radio-science.avif" />
+        <img id="dsoc-image" src="assets/psyche-images/dsoc.avif" />
+
+        
+  
+        <img id="nasa-logo" src="assets/nasa-logo.svg" />
+        <img id="psyche-logo" src="assets/psyche-logo.svg" />
+        <img id="a-frame-logo" src="assets/A-Frame_logo.png" />
+
+        <a-asset-item id="spacecraft-interior" src="assets/objects/spacecraft-interior.glb"></a-asset-item>
+        <a-asset-item id="psyche" src="assets/objects/psyche-asteroid.obj"></a-asset-item>
+        <a-asset-item id="spacecraft" src="assets/objects/psyche-spacecraft.glb"></a-asset-item>
+        <a-asset-item id="spacecraft-smaller" src="assets/objects/psyche-spacecraft-smaller.glb"></a-asset-item>
+      </a-assets>
+    
+      <!-- Backgroun sound Howler -->
+      <script>
+        // Define the background sound using Howler.js
+        const backgroundSound = new Howl({
+          src: ['soundtrack/space-by-sebastian-blanco.m4a'], // Path to your audio file
+          loop: true, // Enable looping
+          volume: 0.5, // Set volume
+          onload: () => {
+            console.log("Sound loaded and ready to play");
+          },
+          onplay: () => {
+            console.log("Space - Sebastian Blanco is playing");
+          }
+        });
+      
+        // Function to start the audio after user interaction
+        function startBackgroundSound() {
+          if (!backgroundSound.playing()) {
+            backgroundSound.play();
+          }
+        }
+      
+        // Add event listeners for user interaction
+        document.addEventListener('click', startBackgroundSound);
+        document.addEventListener('touchstart', startBackgroundSound);
+      </script>
+
+      <!-- Check if mobile or VR -->
+      <Script>
+        // Detect if the user is on a mobile device
+        function isMobile() {
+          return /Android|iPhone|iPad|iPod|BlackBerry|Windows Phone/i.test(navigator.userAgent);
+        }
+
+        // IF VR, automatically load as VR
+        document.addEventListener('DOMContentLoaded', () => {
+          const scene = document.querySelector('a-scene');
+
+          // Check if the browser supports WebXR or WebVR
+          if (scene && scene.renderer.xr && navigator.xr) {
+            navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+              if (supported) {
+                // Automatically enter VR mode
+                scene.enterVR();
+                console.log('Automatically entering VR mode.');
+              } else {
+                console.log('VR is not supported on this device.');
+              }
+            });
+          } else {
+            console.log('WebXR or WebVR is not supported in this browser.');
+          }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+        const cameraRig = document.querySelector('#camera-rig');
+        const lockedRoomBox = document.querySelector('#locked-room-box');
+        const lockedRoomText = document.querySelector('#locked-room-text');
+
+        if (isMobile()) {
+          // Disable movement controls for mobile
+          if (cameraRig) {
+            cameraRig.removeAttribute('movement-controls');
+            console.log('Movement controls disabled for mobile.');
+          }
+
+          // Make the locked room visible
+          lockedRoomBox.setAttribute('visible', true);
+          lockedRoomText.setAttribute('visible', true);
+        }
+      });
+      </Script>
+
+      <!-- CONTROLLER OR HANDS -->
+      <script>
+        // Function to enable or disable hand tracking and controllers
+        function updateControlMode() {
+          const leftHand = document.querySelector('#left-hand');
+          const rightHand = document.querySelector('#right-hand');
+          const leftHandTracking = document.querySelector('#left-hand-tracking');
+          const rightHandTracking = document.querySelector('#right-hand-tracking');
+
+          // Check if controllers are connected
+          const controllers = Array.from(navigator.getGamepads()).filter((gamepad) => gamepad !== null);
+
+          if (controllers.length > 0) {
+            // Enable controller functionality
+            leftHand.setAttribute('visible', true);
+            rightHand.setAttribute('visible', true);
+            leftHandTracking.setAttribute('visible', false);
+            rightHandTracking.setAttribute('visible', false);
+          } else {
+            // Enable hand tracking functionality
+            leftHand.setAttribute('visible', false);
+            rightHand.setAttribute('visible', false);
+            leftHandTracking.setAttribute('visible', true);
+            rightHandTracking.setAttribute('visible', true);
+          }
+        }
+
+        // Listen for controller connection and disconnection events
+        window.addEventListener('gamepadconnected', updateControlMode);
+        window.addEventListener('gamepaddisconnected', updateControlMode);
+
+        // Initial check on page load
+        document.addEventListener('DOMContentLoaded', updateControlMode);
+      </script>
+
+      <!-- Camera Rig for Movement -->
+      <a-entity id="camera-rig" movement-controls="speed: 0.1" dynamic-body>
+        <!-- Camera -->
+        <a-camera id="camera" position="0 0 0" rotation="0 0 0" raycaster="objects: .clickable; far: 20" 
+        look-controls="pointerLockEnabled: false; magicWindowTrackingEnabled: true" cursor="fuse: false; rayOrigin: mouse"></a-camera>
+      
+        <!-- Left Hand Controller (Movement) -->
+        <a-entity id="left-hand" laser-controls="hand: left" 
+          raycaster="objects: .clickable; interval: 100; far: 10" 
+          line="color: orange; opacity: 0.75" thumbstick-movement-left></a-entity>
+      
+        <!-- Right Hand Controller (Camera Rotation) -->
+        <a-entity id="right-hand" laser-controls="hand: right" 
+          raycaster="objects: .clickable; interval: 100; far: 10" 
+          line="color: orange; opacity: 0.75" thumbstick-rotate-camera></a-entity>
+      
+        <!-- Left Hand Tracking with Laser -->
+        <a-entity id="left-hand-tracking" hand-tracking-controls="hand: left" 
+          raycaster="objects: .clickable; interval: 100; far: 10" 
+          line="color: orange; opacity: 0.75" visible="false"></a-entity>
+      
+        <!-- Right Hand Tracking with Laser -->
+        <a-entity id="right-hand-tracking" hand-tracking-controls="hand: right" 
+          raycaster="objects: .clickable; interval: 100; far: 10" 
+          line="color: orange; opacity: 0.75" visible="false"></a-entity>
+      </a-entity>
+      <!-- CAMERA Joystick -->
+      <script>
+        // Component for smooth right controller camera rotation
+        AFRAME.registerComponent('thumbstick-rotate-camera', {
+          schema: {
+            rotationSpeed: { type: 'number', default: 1 } // Adjust rotation speed
+          },
+          init: function () {
+            this.rotationDelta = 0; // Track rotation delta
+            this.el.addEventListener('thumbstickmoved', this.onThumbstickMoved.bind(this));
+          },
+          tick: function () {
+            const cameraRig = document.querySelector('#camera-rig');
+            if (this.rotationDelta !== 0) {
+              const currentRotation = cameraRig.getAttribute('rotation');
+              cameraRig.setAttribute('rotation', {
+                x: currentRotation.x,
+                y: currentRotation.y + this.rotationDelta,
+                z: currentRotation.z
+              });
+            }
+          },
+          onThumbstickMoved: function (evt) {
+            // Adjust rotation delta based on thumbstick input
+            this.rotationDelta = -evt.detail.x * this.data.rotationSpeed;
+          }
+        });
+      </script>
+      <!-- MOVEMENT Joystick -->
+      <script>
+        // Define boundaries
+        const boundaries = {
+          minX: -10,
+          maxX: 10,
+          minZ: -10,
+          maxZ: 40
+        };
+      
+        // Component for left joystick movement
+        AFRAME.registerComponent('thumbstick-movement-left', {
+        schema: {
+          movementSpeed: { type: 'number', default: 0.1 } // Adjust movement speed
+        },
+        init: function () {
+          this.movementDelta = { x: 0, z: 0 }; // Track movement deltas
+          this.el.addEventListener('thumbstickmoved', this.onThumbstickMoved.bind(this));
+        },
+        tick: function () {
+          const cameraRig = document.querySelector('#camera-rig');
+          const position = cameraRig.getAttribute('position');
+
+          // Apply movement deltas to the camera rig's position
+          const newX = position.x + this.movementDelta.x;
+          const newZ = position.z + this.movementDelta.z;
+          const rotation = camera.getAttribute('rotation');
+
+          // Calculate forward and sideways movement based on camera rotation
+          const radY = THREE.MathUtils.degToRad(rotation.y); // Convert Y rotation to radians
+          const forwardX = -Math.sin(radY) * this.movementDelta.z;
+          const forwardZ = -Math.cos(radY) * this.movementDelta.z;
+          const sidewaysX = Math.cos(radY) * this.movementDelta.x;
+          const sidewaysZ = -Math.sin(radY) * this.movementDelta.x;
+
+          // Combine forward and sideways movement
+          const forwX = position.x + forwardX + sidewaysX;
+          const forwZ = position.z + forwardZ + sidewaysZ;
+
+          // Clamp position to boundaries
+          const clampedX = Math.max(boundaries.minX, Math.min(boundaries.maxX, newX));
+          const clampedZ = Math.max(boundaries.minZ, Math.min(boundaries.maxZ, newZ));
+
+          cameraRig.setAttribute('position', { x: clampedX, y: position.y, z: clampedZ });
+        },
+        onThumbstickMoved: function (evt) {
+          // Adjust movement deltas based on thumbstick input
+          this.movementDelta.x = evt.detail.x * this.data.movementSpeed;
+          this.movementDelta.z = evt.detail.y * this.data.movementSpeed;
+        }
+      });
+      </script>
+
+      <!-- Starry Background -->
+      <a-sky material="src: #star-background; repeat: 2 2" rotation="0 -90 0"
+      animation="property: rotation; to: 1 1; loop: true; dur: 60000; easing: linear"></a-sky>
+
+      <!-- Spaceship interior -->
+      <a-entity gltf-model="#spacecraft-interior" position="0 0 0" scale="1 1 1"></a-entity>
+
+      <!-- LOCKED ROOM (VR Only) -->
+      <a-box id="locked-room-box" position="0 0 10.2" depth="0.1" height="12" width="18" color="#000" opacity="0.6" visible="true"></a-box>
+      <!-- Text for Locked Room -->
+      <a-entity id="locked-room-text" position="0 0 9.8" rotation="0 180 0" visible="true">
+        <a-text value="LOCKED ROOM (Wear VR Headset)" color="red" opacity="0.8" align="center" width="10"></a-text>
+      </a-entity>
+
+      <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const scene = document.querySelector('a-scene');
+          const lockedRoomBox = document.querySelector('#locked-room-box');
+          const lockedRoomText = document.querySelector('#locked-room-text');
+
+          // Hide the barrier when entering VR mode
+          scene.addEventListener('enter-vr', () => {
+            lockedRoomBox.setAttribute('visible', false);
+            lockedRoomText.setAttribute('visible', false);
+            console.log('Entered VR mode: Barrier hidden.');
+          });
+
+          // Show the barrier when exiting VR mode
+          scene.addEventListener('exit-vr', () => {
+            lockedRoomBox.setAttribute('visible', true);
+            lockedRoomText.setAttribute('visible', true);
+            console.log('Exited VR mode: Barrier visible.');
+          });
+        });
+      </script>
+
+      <!-- left side pannel (left) -->
+      <a-box position="-10 0 5" depth="10" height="10" width="0.1" material="color: #fff; emissive: #ffffff; emissiveIntensity: 0.5; shader: standard"></a-box>          
+      <!-- PsycheOrbit Image on Top of the Left Side Panel -->
+          <a-box position="-10 1 4" depth="8" height="7" width="0.4" material="src: assets/PsycheOrbit.png; shader: standard; side: double"></a-box>
+          <!-- Light for PsycheOrbit -->
+          <a-light type="point" intensity="10" position="-8 1 4" distance="80" color="white"></a-light>
+        <!-- Button -->
+        <a-box position="-9.8 -2.8 3" depth="6" height="0.7" width="0.1" color="#000" class="clickable" onclick="launchPlayer()"></a-box>
+        <!-- Button Text -->
+        <a-entity position="-9.7 -2.8 3" rotation="0 90 0" class="clickable" onclick="launchPlayer()"> 
+          <a-text value="Click here to open Psyche view of solar system" color="white" align="center" width="6"></a-text>
+        </a-entity>
+        <!-- Embedded Player Container -->
+        <div id="player-container" style="display: none; position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
+          <iframe id="player-iframe" src="" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
+          <button onclick="closePlayer()" style="position: absolute; top: 10px; right: 10px; z-index: 1001; background: red; color: white; border: none; padding: 10px; cursor: pointer;">Close</button>
+        </div>
+        
+        <!-- LAUNCH PLAYER -->
+        <script>
+          function launchPlayer() {
+            const playerContainer = document.getElementById('player-container');
+            const playerIframe = document.getElementById('player-iframe');
+            playerIframe.src = "https://eyes.nasa.gov/apps/solar-system/#/sc_psyche?featured=false&detailPanel=false&search=false&shareButton=false&menu=false&collapseSettingsOptions=true";
+            playerContainer.style.display = 'block';
+          }
+        
+          function closePlayer() {
+            const playerContainer = document.getElementById('player-container');
+            const playerIframe = document.getElementById('player-iframe');
+            playerIframe.src = ""; // Clear the iframe source
+            playerContainer.style.display = 'none';
+          }
+        </script>
+        
+      <!-- Planet Textures -->
+      <a-assets>
+        <img id="sun-texture" src="assets/textures/sun-texture.png">
+        <img id="earth-texture" src="assets/textures/earth-texture.png">
+        <img id="mars-texture" src="assets/textures/mars-texture.jpg">
+        <img id="psyche-texture" src="assets/textures/psyche-texture.png">
+        <img id="jupiter-texture" src="assets/textures/jupiter-texture.jpg">
+      </a-assets>
+
+      <!-- Solar System -->
+      <!-- MAKE LABELS POINT AT WINDOW -->
+      <script>
+        AFRAME.registerComponent('look-at', {
+          schema: { type: 'selector' },
+          init: function () {
+            this.target = this.data;
+          },
+          tick: function () {
+            if (!this.target) return;
+            this.el.object3D.lookAt(this.target.object3D.position);
+          }
+        });
+      </script>
+      <!-- Solar System -->
+      <a-entity id="solar-system" position="-20 2 -8" rotation="0 0 -25">
+        <!-- Sun -->
+        <a-sphere id="sun" position="0 0 0" radius="2" material="src: #sun-texture"></a-sphere>
+        <a-entity position="2 1 1" look-at="#window">
+          <a-plane width="2" height="0.5" color="black" opacity="0.3" position="0 0 -0.01"></a-plane>
+          <a-text value="Sun" color="white" align="center" width="10"></a-text>
+        </a-entity>
+
+        <!-- Earth -->
+        <a-entity id="earth-orbit" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+          <a-sphere id="earth" position="3 0 0" radius="0.5" material="src: #earth-texture"></a-sphere>
+          <a-entity position="3 0 1" look-at="#window">
+            <a-plane width="2" height="0.5" color="black" opacity="0.3" position="0 0 -0.01"></a-plane>
+            <a-text value="Earth" color="white" align="center" width="8"></a-text>
+          </a-entity>
+        </a-entity>
+
+        <!-- Mars -->
+        <a-entity id="mars-orbit" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear">
+          <a-sphere id="mars" position="5 0 0" radius="0.4" material="src: #mars-texture"></a-sphere>
+          <a-entity position="5 0 1" look-at="#window">
+            <a-plane width="2" height="0.5" color="black" opacity="0.3" position="0 0 -0.01"></a-plane>
+            <a-text value="Mars" color="white" align="center" width="8"></a-text>
+          </a-entity>
+        </a-entity>
+
+        <!-- Psyche -->
+        <a-entity id="psyche-orbit" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+          <a-sphere id="psyche" position="6 0 0" radius="0.3" material="src: #psyche-texture"></a-sphere>
+          <a-entity position="6 0 1" look-at="#window">
+            <a-plane width="2" height="0.5" color="black" opacity="0.3" position="0 0 -0.01"></a-plane>
+            <a-text value="Psyche" color="white" align="center" width="8"></a-text>
+          </a-entity>
+        </a-entity>
+
+        <!-- Jupiter -->
+        <a-entity id="jupiter-orbit" rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 20000; easing: linear">
+          <a-sphere id="jupiter" position="8 0 0" radius="1" material="src: #jupiter-texture"></a-sphere>
+          <a-entity position="8 0 2" look-at="#window">
+            <a-plane width="2" height="0.5" color="black" opacity="0.3" position="0 0 -0.01"></a-plane>
+            <a-text value="Jupiter" color="white" align="center" width="8"></a-text>
+          </a-entity>
+        </a-entity>
+      </a-entity>
+      <!-- Window Target -->
+      <a-entity id="window" position="0 0 -4"></a-entity>
+
+      <!-- FRONT DESK -->
+      <!-- Command buttons -->
+      <!-- Red Go Back Button -->
+      <a-box position="-3 -2.8 -8.5" depth="0.5" height="0.4" width="1" color="#F04" class="clickable" event-set__click="_event: click; color: #0056b3" onclick="redirectTo()"></a-box>
+      <a-light type="point" intensity="2" position="-3 -2.4 -8.4" color="red"></a-light>
+      <a-entity id="reset-label" position="-3 -2.8 -8.2">
+        <a-plane width="1" height="0.2" color="red" opacity="0.1"></a-plane>
+        <a-text value="RESET" color="white" align="center" position="0 0 0.01"></a-text>
+      </a-entity>
+      
+      <!--Blue Information Button -->
+      <a-box position="0 -2.8 -8.5" depth="0.5" height="0.4" width="1" color="#04F" class="clickable" event-set__click="_event: click; color: #0056b3" onclick="showDescription('Info Help', 'On Mobile \n Move phone around to explore the room. \n Click on various buttons / objects to learn more about the Psyche mission. \n\n On VR \n Make sure your headset and controllers are connected. \n Point at the buttons / objects with your controller and using the trigger click on them to learn more about the mission \n\n', 'info-label', '0 1 -8.5', '0 0 0')"></a-box>
+      <a-light type="point" intensity="2" position="0 -2.4 -8.4" color="blue"></a-light>
+      <a-entity id="info-label" position="0 -2.8 -8.2"
+        onclick="showDescription('Info Help', 'On Mobile \n Move phone around to explore the room. \n Click on various buttons / objects to learn more about the Psyche mission. \n\n\n\n On VR \n Make sure your headset and controllers are connected. \n Point at the buttons / objects with your controller and using the trigger click on them to learn more about the mission \n\n\n\n', 'info-label', '0 1 -8.5', '0 0 0')">
+        <a-plane width="1.5" height="0.2" color="blue" opacity="0.1" class="clickable"></a-plane>
+        <a-text value="Information" color="white" align="center" position="0 0 0.01"></a-text>
+      </a-entity>
+
+      <!-- ARCADE 360 VIDEO -->
+      <a-entity id="arcade-display" position="-6 0 -7" rotation="0 20 0">
+        <!-- Label on top -->
+        <a-entity id="arcade-label" position="0 2 0.6">
+          <a-box width="2" height="0.3" depth="0.1" color="black"></a-box>
+          <a-text value="PSYCHE 360 Video" color="Orange" align="center" width="3" position="0 -0.04 0.1"></a-text>
+          <a-light type="point" intensity="2" position="0 -0.1 0.2" color="orange"></a-light>
+          <a-light type="point" intensity="2" position="0 -3 0.1" color="orange"></a-light>
+        </a-entity>
+        <!-- Arcade Display -->
+        <a-box width="2.5" height="3.6" depth="0.1" material="src: #detail-hud" position="0 -0.1 0.01"></a-box>
+        <a-box width="2.5" height="4" depth="0.1" color="white"></a-box>
+        <!-- Stand -->
+        <a-box width="2.5" height="2.5" depth="0.6" material="src: #white-walls; repeat: 1 4; shader: standard" position="0 -2.4 0.3"></a-box>
+        <!-- Flat Pieces -->
+        <a-box width="2.5" height="0.4" depth="0.6" material="src: #white-walls;" position="0 2 0.3"></a-box>
+        <a-box width="0.1" height="6" depth="1" material="src: #white-walls;" position="1.2 -1.2 0.1"></a-box>
+        <a-box width="0.1" height="6" depth="1" material="src: #white-walls;" position="-1.2 -1.2 0.1"></a-box>
+        <!-- Play Button -->
+        <a-entity id="play-button" position="0 -1.1 0.4">
+          <a-box width="0.4" height="0.1" depth="0.2" color="orange" class="clickable" onclick="launchYouTubeVideo()"></a-box>
+          <a-text value="Click Button To Watch Video" color="white" align="center" position="0 0.3 0.2" width="3"></a-text>
+        </a-entity>
+      </a-entity>
+      <!-- Embedded Video Panel -->
+      <div id="video-panel" style="display: none; position: absolute; top: 10%; left: 10%; width: 80%; height: 80%; z-index: 1000; background: rgba(0, 0, 0, 0.8);">
+        <iframe id="video-iframe" width="100%" height="100%" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <button onclick="closeYouTubeVideo()" style="position: absolute; top: 10px; right: 10px; z-index: 1001; background: red; color: white; border: none; padding: 10px; cursor: pointer;">Close</button>
+      </div>
+      <script>
+        function launchYouTubeVideo() {
+          const videoPanel = document.getElementById('video-panel');
+          const videoIframe = document.getElementById('video-iframe');
+          videoIframe.src = "https://www.youtube.com/embed/fRChtFMx144?autoplay=1&rel=0";
+          videoPanel.style.display = 'block';
+        }
+      
+        function closeYouTubeVideo() {
+          const videoPanel = document.getElementById('video-panel');
+          const videoIframe = document.getElementById('video-iframe');
+          videoIframe.src = ""; // Clear the iframe source
+          videoPanel.style.display = 'none';
+        }
+      </script>
+      
+      <!-- PSYCHE OBJECTS -->
+      <!-- Description Panel -->
+      <a-entity id="description-panel" visible="false" class="clickable">
+        <a-plane width="4.2" height="4.2" color="black" position="0 0 -0.02"></a-plane>
+        <a-plane width="4.1" height="4.1" color="orange" position="0 0 -0.01"></a-plane>
+        <a-plane width="4" height="4" color="black" opacity="0.8"></a-plane>
+        <a-text id="description-title" value="" color="white" align="center" position="0 1.5 0.01" width="5"></a-text>
+        <a-text id="description-content" value="" color="white" align="center" position="0 -0.5 0.01" width="4"></a-text>
+      </a-entity>
+
+      <script>
+        let isDescriptionVisible = false; // Track the state of the description panel
+        let lastClickedLabel = null; // Track the last clicked label
+
+        function showDescription(title, description, labelId, position, rotation="0 -90 0") {
+          const panel = document.querySelector('#description-panel');
+          const titleText = document.querySelector('#description-title');
+          const contentText = document.querySelector('#description-content');
+          const currentLabel = document.querySelector(`#${labelId}`);
+
+          // Hide the previous label if it exists and is not the current one
+          if (lastClickedLabel && lastClickedLabel !== currentLabel) {
+            lastClickedLabel.setAttribute('visible', true); // Show the previous label
+          }
+
+          if (isDescriptionVisible && lastClickedLabel === currentLabel) {
+            // Hide the description panel and show the smaller label
+            panel.setAttribute('visible', false);
+            currentLabel.setAttribute('visible', true); // Show the smaller label
+            isDescriptionVisible = false;
+            lastClickedLabel = null; // Reset the last clicked label
+          } else {
+            // Update the text values
+            titleText.setAttribute('value', `${title}\n_________________`);
+            contentText.setAttribute('value', description);
+
+            // Update the position and rotation of the panel
+            panel.setAttribute('position', position);
+            panel.setAttribute('rotation', rotation);
+
+            // Make the panel visible
+            panel.setAttribute('visible', true);
+
+            // Hide the smaller label
+            currentLabel.setAttribute('visible', false);
+
+            isDescriptionVisible = true;
+            lastClickedLabel = currentLabel; // Store the current label
+          }
+        }
+      </script>
+      <!-- Psyche Objects -->
+      <a-entity id="psyche-objects">
+        <!-- Psyche -->
+        <a-box position="8 -1.5 -3" depth="1" height="1" width="1" material="src: #psyche-texture;" class="clickable"
+              onclick="showDescription('Psyche', 'Only the 16th asteroid to be discovered, Psyche was found in 1852 by Italian astronomer Annibale de Gasparis, who named it for the goddess of the soul in ancient Greek mythology. \n \n What gives asteroid Psyche great scientific interest is that it is likely rich in metal. \n\n It may consist largely of metal from the core of a planetesimal, one of the building blocks of the Suns planetary system. \n\n At Psyche scientists will explore, for the first time ever, a world made not of rock or ice, but rich in metal.', 'psyche-label', '8 1.8 -3')"
+              animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear"
+              animation__bounce="property: position; dir: alternate; dur: 2200; loop: true; to: 8 -1 -3"></a-box>
+        <!-- Psyche Label -->
+        <a-entity id="psyche-label" position="6 -2 -2.5" rotation="-20 -90 0"
+                  onclick="showDescription('Psyche', 'Only the 16th asteroid to be discovered, Psyche was found in 1852 by Italian astronomer Annibale de Gasparis, who named it for the goddess of the soul in ancient Greek mythology. \n \n What gives asteroid Psyche great scientific interest is that it is likely rich in metal. \n\n It may consist largely of metal from the core of a planetesimal, one of the building blocks of the Suns planetary system. \n\n At Psyche scientists will explore, for the first time ever, a world made not of rock or ice, but rich in metal.', 'psyche-label', '8 1.8 -3')">
+          <a-plane width="2" height="0.5" color="black" opacity="0.6" class="clickable"></a-plane>
+          <a-text value="Psyche Material" color="white" align="center" position="0 0 0.01"></a-text>
+        </a-entity>
+
+    <!-- Clock Object -->
+    <a-entity id="clock-entity" position="8 -1.5 0" class="clickable"
+              onclick="showDescription('Launch Time', 'PSYCHE WAS LAUNCHED. \n\n NASA selected SpaceX of Hawthorne, California, to provide launch services for the Psyche mission. Psyche successfully launched at 10:19 a.m. EDT Friday, October 13, 2023 aboard a SpaceX Falcon Heavy rocket from Launch Pad 39A at NASAs Kennedy Space Center in Florida. \n\n Primary Mission Duration: 26 months at the Psyche asteroid \n\n Arrival at Asteroid: Mid-2029', 'clock-label', '8 1.8 0')">
+        <!-- Spinning Clock -->
+        <a-box depth="2.5" height="1" width="0.3" color="black" class="clickable" 
+         animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear"
+         animation__bounce="property: position; dir: alternate; dur: 2100; loop: true; to: 0 0.5 0">
+         <a-box depth="2.55" height="1.06" width="0.29" color="white"></a-box>
+            <!-- Clock Labels (inside the box) -->
+            <a-entity id="clock-labels" rotation="0 -90 0">
+              <!-- Front Face -->
+              <a-text id="clock-label-front" value="0 days, 0 hours, 0 minutes, 0 seconds" color="orange" align="center" position="0 0.15 0.2" rotation="0 0 0" width="7"></a-text>
+              <a-text value="days | hours | minutes | seconds" color="white" align="center" position="0 -0.2 0.2" rotation="0 0 0" width="4"></a-text>
+              <!-- Back Face -->
+              <a-text id="clock-label-back" value="0 days, 0 hours, 0 minutes, 0 seconds" color="orange" align="center" position="0 0.15 -0.2" rotation="0 180 0" width="7"></a-text>
+              <a-text value="days | hours | minutes | seconds" color="white" align="center" position="0 -0.2 -0.2" rotation="0 180 0" width="4"></a-text>
+            </a-entity>
+          </a-box>
+          
+        </a-entity>
+        <!-- Clock Label -->
+        <a-entity id="clock-label" position="6 -2 0" rotation="-20 -90 0" class="clickable"
+        onclick="showDescription('Launch Time', 'PSYCHE WAS LAUNCHED. \n\n NASA selected SpaceX of Hawthorne, California, to provide launch services for the Psyche mission. Psyche successfully launched at 10:19 a.m. EDT Friday, October 13, 2023 aboard a SpaceX Falcon Heavy rocket from Launch Pad 39A at NASAs Kennedy Space Center in Florida. \n\n Primary Mission Duration: 26 months at the Psyche asteroid \n\n Arrival at Asteroid: Mid-2029', 'clock-label', '8 1.8 0')">
+          <a-plane width="1.5" height="0.5" color="black" opacity="0.6" class="clickable"></a-plane>
+          <a-text value="Launch Time" color="white" align="center" position="0 0 0.01" class="clickable"></a-text>
+        </a-entity>
+      
+      <script>
+        // Initialize the start time (Psyche was launched on October 13, 2023. 2:19:42 UTC)
+        const startTime = new Date('October 13, 2023 10:19:42 EDT');
+      
+        function updateClockLabels() {
+          // Get the current time
+          const now = new Date();
+          // Calculate the difference in milliseconds
+          const diff = now - startTime;
+          // Convert the difference to days, hours, minutes, and seconds
+          const diffInSeconds = Math.floor(diff / 1000);
+          const days = Math.floor(diffInSeconds / (60 * 60 * 24));
+          const remainingSecondsAfterDays = diffInSeconds % (60 * 60 * 24);
+          const hours = Math.floor(remainingSecondsAfterDays / (60 * 60));
+          const remainingSecondsAfterHours = remainingSecondsAfterDays % (60 * 60);
+          const minutes = Math.floor(remainingSecondsAfterHours / 60);
+          const seconds = remainingSecondsAfterHours % 60;
+          // Update the labels
+          const timeString = `${days} | ${hours} | ${minutes} | ${seconds}`;
+          document.querySelector('#clock-label-front').setAttribute('value', timeString);
+          document.querySelector('#clock-label-back').setAttribute('value', timeString);
+        }
+        // Update the clock labels every second (1000ms)
+        setInterval(updateClockLabels, 1000);
+      </script>
+
+      <!-- Psyche Spacecraft -->
+      <a-entity id="spacecraft-container" position="7.5 -1.5 3">
+        <!-- Spacecraft Model -->
+        <a-entity gltf-model="#spacecraft-smaller" scale="0.2 0.2 0.2" rotation="0 0 0"
+                  animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+        </a-entity>
+        <!-- Clickable Transparent Block -->
+        <a-box position="0 0 0" depth="2" height="2" width="2" color="white" opacity="0.01" class="clickable"
+              onclick="showDescription('Spacecraft', 'The Psyche spacecraft and solar panels, built by Maxar Technologies, are about the size of a singles tennis court. \n\n The body of the spacecraft is slightly bigger than a small van and about as tall as a regulation basketball hoop. The spacecraft includes a Gamma-Ray and Neutron Spectrometer, a Multispectral Imager, a Magnetometer and an x-band radio telecommunications system. \n\n The Psyche mission is also testing a sophisticated new laser communication technology, called Deep Space Optical Communication, that encodes data in photons to communicate between a probe in deep space and Earth.', 'spacecraft-label', '8 1.8 3')">
+        </a-box>
+      </a-entity>
+      <!-- Spacecraft Label -->
+      <a-entity id="spacecraft-label" position="6 -2 2.5" rotation="-20 -90 0" class="clickable" 
+                onclick="showDescription('Spacecraft', 'The Psyche spacecraft and solar panels, built by Maxar Technologies, are about the size of a singles tennis court. \n\n The body of the spacecraft is slightly bigger than a small van and about as tall as a regulation basketball hoop. The spacecraft includes a Gamma-Ray and Neutron Spectrometer, a Multispectral Imager, a Magnetometer and an x-band radio telecommunications system. \n\n The Psyche mission is also testing a sophisticated new laser communication technology, called Deep Space Optical Communication, that encodes data in photons to communicate between a probe in deep space and Earth.', 'spacecraft-label', '8 1.8 3')">
+        <a-plane width="1.5" height="0.5" color="black" opacity="0.6" class="clickable"></a-plane>
+        <a-text value="Spacecraft" color="white" align="center" position="0 0 0.01" class="clickable"></a-text>
+      </a-entity>
+
+      <!-- CORRIDOR EXPERIENCES -->
+        <a-plane width="30" height="20" color="black" opacity="1" position="11 0 20" rotation="0 -90 0"></a-plane>
+        <a-plane width="30" height="20" color="black" opacity="1" position="-11 0 20" rotation="0 90 0"></a-plane>
+        <!-- Red Lights Between First Doors -->
+        <!-- Corridor Right Side-->
+        <a-light type="point" intensity="5" position="-10 2 16" distance="6" color="#ff0000"></a-light>
+        
+        <!-- Instrument Gallery position="-8.5 0 16" rotation="0 90 0" -->
+        <a-light type="point" intensity="10" position="-8 -2 16" distance="6" color="#ffffff"></a-light>
+        <!-- Instrument Gallery -->
+        <a-entity id="instrument-gallery" position="-8.5 0 16" rotation="0 90 0">
+          <!-- Left Navigation Button -->
+          <a-box id="left-button" position="-1.5 0 0.1" depth="0.01" height="2" width="0.3" color="black" class="clickable" onclick="navigateGallery(-1)">
+            <a-text value="<" color="white" align="center" position="0 0 0.1" width="2"></a-text>
+          </a-box>
+          <!-- Right Navigation Button -->
+          <a-box id="right-button" position="1.5 0 0.1" depth="0.01" height="2" width="0.3" color="black" class="clickable" onclick="navigateGallery(1)">
+            <a-text value=">" color="white" align="center" position="0 0 0.1" width="2"></a-text>
+          </a-box>
+          <!-- Carousel Plane -->
+          <a-plane id="carousel-plane" position="0 0 0" width="3" height="2" color="black" visible="true">
+            <a-plane id="border" position="0 2 0.49" rotation="30 0 0" width="3.6" height="2.2" color="black"></a-plane>
+            <a-plane id="carousel-image" position="0 2 0.5" rotation="30 0 0" width="3.5" height="2" material="src: #placeholder-image"></a-plane>
+            <a-text id="carousel-text" value="" color="white" align="center" position="0 0.05 0.1" width="2.5"></a-text>
+          </a-plane>
+        </a-entity>
+        <!-- Carousel Logic -->
+        <script>
+          const carouselData = [
+            {
+              image: '#multispectral-image',
+              text: 'The Multispectral Imager provides high-resolution images using filters to discriminate between Psyche metallic and silicate constituents.\n\nThe instrument consists of a pair of identical cameras designed to acquire geologic, compositional, and topographic data.\n\nThe purpose of the second camera is to provide redundancy for mission-critical optical navigation.\nThe team is based at Arizona State University.'
+            },
+            {
+              image: '#spectrometer-image',
+              text: 'The Gamma-Ray and Neutron Spectrometer will detect, measure, and map Psyche elemental composition.\n\nThe instrument is mounted on a 6-foot (2-meter) boom to distance the sensors from background radiation created by energetic particles interacting with the spacecraft and to provide an unobstructed field of view.\n\nThe team is based at the Applied Physics Laboratory at Johns Hopkins University.'
+            },
+            {
+              image: '#magnetometer-image',
+              text: 'The Psyche Magnetometer is designed to detect and measure the remanent magnetic field of the asteroid.\n\nIt is composed of two identical high-sensitivity magnetic field sensors located at the middle and outer end of a 6-foot (2-meter) boom.\n\nThe team is based at Massachusetts Institute of Technology and Technical University of Denmark (DTU).'
+            },
+            {
+              image: '#radio-image',
+              text: 'The Psyche mission will use the X-band radio telecommunications system to measure Psyche gravity field to high precision.\n\nWhen combined with topography derived from onboard imagery, this will provide information on the interior structure of Psyche.\n\nThe team is based at Massachusetts Institute of Technology and the Jet Propulsion Laboratory.'
+            },
+            {
+              image: '#dsoc-image',
+              text: 'The Psyche mission will test a sophisticated new laser communication technology that encodes data in photons (rather than radio waves) to communicate between a probe in deep space and Earth.\n\nUsing light instead of radio allows the spacecraft to communicate more data in a given amount of time.\n\nThe Deep Space Optical Communication (DSOC) team is based at the Jet Propulsion Laboratory.'
+            }
+          ];
+
+          let currentPlaneIndex = 0; // Track the currently visible plane
+
+          function navigateGallery(direction) {
+            // Update the index based on the direction (-1 for left, 1 for right)
+            currentPlaneIndex = (currentPlaneIndex + direction + carouselData.length) % carouselData.length;
+
+            // Update the carousel content
+            const carouselImage = document.querySelector('#carousel-image');
+            const carouselText = document.querySelector('#carousel-text');
+
+            // Set the new image and text
+            carouselImage.setAttribute('material', `src: ${carouselData[currentPlaneIndex].image}`);
+            carouselText.setAttribute('value', carouselData[currentPlaneIndex].text);
+          }
+
+          // Initialize the carousel with the first plane's data
+          document.addEventListener('DOMContentLoaded', () => {
+            navigateGallery(0); // Load the first plane
+          });
+        </script>
+
+        <!-- Corridor Left Side-->
+        <a-light type="point" intensity="5" position="10 2 16" distance="6" color="#ff0000"></a-light>   
+        <!-- CREDITS -->
+        <a-light type="point" intensity="10" position="8 -2 16" distance="6" color="#ffffff"></a-light>
+        <a-entity id="credit-message" position="9 0 16" rotation="0 -90 0">
+          <!-- Left Navigation Button -->
+          <a-box id="credit-left-button" position="-1.5 0 0.1" depth="0.01" height="2" width="0.3" color="black" class="clickable" onclick="navigateCredits(-1)">
+            <a-text value="<" color="white" align="center" position="0 0 0.1" width="2"></a-text>
+          </a-box>
+          <!-- Right Navigation Button -->
+          <a-box id="credit-right-button" position="1.5 0 0.1" depth="0.01" height="2" width="0.3" color="black" class="clickable" onclick="navigateCredits(1)">
+            <a-text value=">" color="white" align="center" position="0 0 0.1" width="2"></a-text>
+          </a-box>
+          <!-- Credit Plane -->
+          <a-plane id="credit-plane" position="0 0 0" width="3" height="2" color="black" visible="true">
+            <a-plane id="credit-border" position="0 2 0.49" rotation="30 0 0" width="3.6" height="2.2" color="black"></a-plane>
+            <a-plane id="credit-image" position="0 2 0.5" rotation="30 0 0" width="3.5" height="2" material="src: #placeholder-image"></a-plane>
+            <a-text id="credit-text" value="" color="white" align="center" position="0 0.05 0.1" width="4"></a-text>
+          </a-plane>
+        </a-entity>
+        
+        <!-- Credit Logic -->
+        <script>
+          const creditData = [
+            {
+              image: '#psyche-logo',
+              text: '\n\n\nCREDITS\n\n\n'
+            },
+            {
+              image: '#nasa-logo',
+              text: '\n Special Thanks:\n\n NASA Psyche Mission Team \n\n Arizona State University\n\n'
+            },
+            {
+              image: null,
+              text: '\nLead Developer: \n\nSantiago Blanco\n\n'
+            },
+            {
+              image: '#switches-buttons',
+              text: '\n Sound Engineer: \n\nSebastian Blanco \n\n'
+            },
+            {
+              image: '#a-frame-logo',
+              text: 'Powered By:\nA-Frame\n\nThree.js\n\nHowler.js'
+            }
+          ];
+        
+          let currentCreditIndex = 0; // Track the currently visible credit panel
+        
+          function navigateCredits(direction) {
+            // Update the index based on the direction (-1 for left, 1 for right)
+            currentCreditIndex = (currentCreditIndex + direction + creditData.length) % creditData.length;
+        
+            // Update the credit content
+            const creditImage = document.querySelector('#credit-image');
+            const creditText = document.querySelector('#credit-text');
+        
+            // Set the new image or placeholder
+            if (creditData[currentCreditIndex].image) {
+              creditImage.setAttribute('material', `src: ${creditData[currentCreditIndex].image}`);
+            } else {
+              creditImage.setAttribute('material', 'src: #psyche-texture'); // Use placeholder if no image
+            }
+        
+            // Set the new text
+            creditText.setAttribute('value', creditData[currentCreditIndex].text);
+          }
+        
+          // Initialize the credit screen with the first panel's data
+          document.addEventListener('DOMContentLoaded', () => {
+            navigateCredits(0); // Load the first panel
+          });
+        </script>
+
+        <!-- Red Lights Between Second Doors -->
+        <!-- Corridor Right Side-->
+        <a-light type="point" intensity="5" position="-10 2 18" distance="6" color="#ff0000"></a-light>
+        <!-- Interactable Psyche position="-9 0 24" rotation="0 30 0" -->
+        <a-light type="point" intensity="20" position="-8 -2 24" distance="6" color="#ffffff"></a-light>
+        <a-light type="point" intensity="20" position="-8 2 24" distance="6" color="#ffffff"></a-light>
+        <!-- Asteroid -->
+        <a-entity id="asteroid" obj-model="obj: #psyche" position="-8 0 24" scale="0.5 0.5 0.5" rotation="0 0 0"
+          class="clickable"
+          material="src: #psyche-texture; color: white; metalness: 0.8; roughness: 0.3; emissive: #555; emissiveIntensity: 0.02"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear"
+          animation__scale-in="property: scale; to: 1 1 1; dur: 500; startEvents: zoom-in"
+          animation__scale-out="property: scale; to: 0.5 0.5 0.5; dur: 500; startEvents: zoom-out"
+          raycaster-listener>
+        </a-entity>
+
+        <script>
+          // Register a component to handle raycaster interactions
+          AFRAME.registerComponent('raycaster-listener', {
+          init: function () {
+          // Listen for the click event to zoom in
+          this.el.addEventListener('mousedown', (evt) => {
+          const intersection = evt.detail.intersection; // Get the intersection point
+          if (intersection) {
+            this.zoomAsteroid();
+          }
+          });
+
+          // Listen for the mouseup or touchend event to zoom out
+          this.el.addEventListener('mouseup', () => {
+          this.resetAsteroid();
+          });
+          this.el.addEventListener('touchend', () => {
+          this.resetAsteroid();
+          });
+          },
+          zoomAsteroid: function () {
+          const asteroid = this.el;
+
+          // Trigger the zoom-in animation
+          asteroid.emit('zoom-in');
+          },
+          resetAsteroid: function () {
+          const asteroid = this.el;
+
+          // Trigger the zoom-out animation
+          asteroid.emit('zoom-out');
+          }
+          });
+        </script>
+        
+        <!-- Corridor Left Side-->
+        <a-light type="point" intensity="5" position="10 2 18" distance="6" color="#ff0000"></a-light>   
+        <!-- Spacecraft Detail -->
+        <a-light type="point" intensity="20" position="8 -2 24" distance="6" color="#ffffff"></a-light>
+        <a-light type="point" intensity="20" position="8 2 24" distance="6" color="#ffffff"></a-light>
+        <!-- Spacecraft Model -->
+        <a-entity gltf-model="#spacecraft-smaller" position="8 0 24" scale="0.2 0.2 0.2" rotation="0 0 0"
+          class="clickable"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear"
+          animation__scale-in="property: scale; to: 0.4 0.4 0.4; dur: 500; startEvents: zoom-in"
+          animation__scale-out="property: scale; to: 0.2 0.2 0.2; dur: 500; startEvents: zoom-out"
+          raycaster-listener>
+        </a-entity>
+        
+
+
+        
+    </a-scene>
+    <script>
+      function redirectTo() {
+        window.location.href = "explore.html";
+      }
+    </script>
+  </body>
+</html>

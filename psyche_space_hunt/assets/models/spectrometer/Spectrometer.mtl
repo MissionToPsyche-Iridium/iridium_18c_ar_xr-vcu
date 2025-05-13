@@ -1,0 +1,95 @@
+# Blender 4.3.2 MTL File: 'Satelite_Parts.blend'
+# www.blender.org
+
+newmtl Dark_Grey
+Kd 0.035065 0.049438 0.046021
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+Pr 0.500000
+Pm 0.700000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+
+newmtl black?
+Kd 0.000000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+Pr 0.700000
+Pm 0.300000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+
+newmtl gold
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd ../../textures/light-gold-bl/lightgold_albedo.png
+map_Pm ../../textures/light-gold-bl/lightgold_metallic.png
+map_Pr ../../textures/light-gold-bl/lightgold_roughness.png
+map_Bump -bm 1.000000 ../../textures/light-gold-bl/lightgold_normal-ogl.png
+
+newmtl gold_gold
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_basecolor.png
+map_Pm C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_metallic.png
+map_Pr C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_roughness.png
+map_Bump -bm 1.000000 C:/Users/10and/Downloads/gold-scuffed-bl/gold-scuffed-bl/gold-scuffed_normal.png
+
+newmtl silver
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd C:/Users/10and/Downloads/silver-bl/silver-bl/silver_albedo.png
+map_Pm C:/Users/10and/Downloads/silver-bl/silver-bl/silver_metallic.png
+map_Pr C:/Users/10and/Downloads/silver-bl/silver-bl/silver_roughness.png
+map_Bump -bm 1.000000 C:/Users/10and/Downloads/silver-bl/silver-bl/silver_normal-ogl.png
+
+newmtl white_base
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+Pr 0.500000
+Pm 0.200000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
